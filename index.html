@@ -212,6 +212,12 @@
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
+        .player-games.late-arrival {
+            background: linear-gradient(135deg, rgba(200, 200, 200, 0.25), rgba(200, 200, 200, 0.12));
+            color: #d0d0d0;
+            opacity: 0.8;
+        }
+
         .empty-message {
             font-size: 13px;
             opacity: 0.6;
@@ -663,6 +669,18 @@
         </div>
     </div>
 
+    <!-- Game Preview Modal -->
+    <div class="modal" id="gamePreviewModal">
+        <div class="modal-content">
+            <div class="modal-title">Próximo Juego</div>
+            <div id="gamePreviewContent"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" id="previewCancelBtn">Cancelar</button>
+                <button class="modal-btn modal-btn-confirm" id="previewConfirmBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // State
         let gameNumber = 1;
@@ -671,6 +689,8 @@
         let blueTeam = [];
         let whiteTeam = [];
         let bench = [];
+        let gameStartTime = null;
+        let previousGameDuration = null;
 
         // DOM Elements
         const gameNumberEl = document.getElementById('gameNumber');
@@ -700,10 +720,15 @@
             resetBtn.addEventListener('click', openResetDialog);
             resetConfirmBtn.addEventListener('click', confirmReset);
             resetCancelBtn.addEventListener('click', closeResetDialog);
+            document.getElementById('previewConfirmBtn').addEventListener('click', confirmNextGame);
+            document.getElementById('previewCancelBtn').addEventListener('click', () => {
+                document.getElementById('gamePreviewModal').classList.remove('active');
+            });
             playerNameInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') confirmAddPlayer();
             });
             playerNameInput.addEventListener('input', updateSwapPreview);
+            gameStartTime = new Date();
             render();
         }
 
@@ -761,13 +786,18 @@
             const team = nextArrivalNumber % 2 === 1 ? 'blue' : 'white';
             const arrivalTime = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
+            // Si llega después del primer juego, comienza con el contador actual
+            const isLateArrival = gameNumber > 1;
+            const gamesPlayed = isLateArrival ? gameNumber - 1 : 0;
+
             const player = {
                 id: Math.random(),
                 name,
                 arrivalNumber,
                 team,
-                gamesPlayed: 0,
-                arrivalTime
+                gamesPlayed,
+                arrivalTime,
+                isLateArrival
             };
 
             players.push(player);
@@ -821,14 +851,147 @@
 
         // Game Result
         function registerGameResult(winnerTeam) {
+            // Calcular duración
+            const now = new Date();
+            const durationMs = now - gameStartTime;
+            const minutes = Math.floor(durationMs / 60000);
+            const seconds = Math.floor((durationMs % 60000) / 1000);
+            previousGameDuration = `${minutes}m ${seconds}s`;
+
             // Increment games for all current players on court
             blueTeam.forEach(p => p.gamesPlayed++);
             whiteTeam.forEach(p => p.gamesPlayed++);
 
-            gameNumber++;
+            // Calcular próxima alineación
+            const nextLineup = calculateNextLineup();
 
+            // Mostrar preview
+            showGamePreview(winnerTeam, nextLineup);
+        }
+
+        function calculateNextLineup() {
+            // Separar banca por equipo
+            const blueBench = bench.filter(p => p.team === 'blue').sort((a, b) => {
+                if (a.gamesPlayed !== b.gamesPlayed) return a.gamesPlayed - b.gamesPlayed;
+                return a.arrivalNumber - b.arrivalNumber;
+            });
+
+            const whiteBench = bench.filter(p => p.team === 'white').sort((a, b) => {
+                if (a.gamesPlayed !== b.gamesPlayed) return a.gamesPlayed - b.gamesPlayed;
+                return a.arrivalNumber - b.arrivalNumber;
+            });
+
+            // Calcular quién sale de cada equipo (más juegos o llegada más tarde en caso de empate)
+            const blueExit = blueTeam.length > 0 ? getPlayerToRemove(blueTeam) : null;
+            const whiteExit = whiteTeam.length > 0 ? getPlayerToRemove(whiteTeam) : null;
+
+            // Calcular quién entra (prioridad: menos juegos > llegó más temprano)
+            const blueEntry = blueBench.length > 0 ? blueBench[0] : null;
+            const whiteEntry = whiteBench.length > 0 ? whiteBench[0] : null;
+
+            return {
+                blueExit,
+                whiteExit,
+                blueEntry,
+                whiteEntry,
+                nextBlueTeam: blueEntry ?
+                    [...blueTeam.filter(p => p.id !== blueExit?.id), blueEntry] :
+                    blueTeam,
+                nextWhiteTeam: whiteEntry ?
+                    [...whiteTeam.filter(p => p.id !== whiteExit?.id), whiteEntry] :
+                    whiteTeam
+            };
+        }
+
+        function showGamePreview(winnerTeam, nextLineup) {
+            const previewEl = document.getElementById('gamePreviewContent');
+
+            const blueExitName = nextLineup.blueExit?.name || 'Nadie';
+            const whiteExitName = nextLineup.whiteExit?.name || 'Nadie';
+            const blueEntryName = nextLineup.blueEntry?.name || 'Nadie';
+            const whiteEntryName = nextLineup.whiteEntry?.name || 'Nadie';
+
+            previewEl.innerHTML = `
+                <div class="modal-confirmation">
+                    <div style="font-weight: 700; color: #a0ff00; margin-bottom: 12px;">
+                        🏀 ${winnerTeam === 'blue' ? 'EQUIPO AZUL' : 'EQUIPO BLANCO'} GANÓ
+                    </div>
+                    <div style="font-size: 13px; opacity: 0.9;">
+                        Duración: <strong>${previousGameDuration}</strong>
+                    </div>
+                </div>
+
+                <div class="swap-info" style="margin-bottom: 16px;">
+                    <div class="swap-info-title">⚽ Equipo Azul</div>
+                    ${nextLineup.blueExit ? `
+                        <div class="swap-item">
+                            <div class="swap-item-label">Sale:</div>
+                            <div class="swap-item-name swap-leaving">${blueExitName}</div>
+                        </div>
+                    ` : ''}
+                    ${nextLineup.blueEntry ? `
+                        <div class="swap-item">
+                            <div class="swap-item-label">Entra:</div>
+                            <div class="swap-item-name swap-entering">${blueEntryName}</div>
+                        </div>
+                    ` : ''}
+                    ${!nextLineup.blueExit && !nextLineup.blueEntry ? `
+                        <div class="swap-item" style="font-size: 12px; opacity: 0.7;">
+                            Sin cambios
+                        </div>
+                    ` : ''}
+                </div>
+
+                <div class="swap-info">
+                    <div class="swap-info-title">⚽ Equipo Blanco</div>
+                    ${nextLineup.whiteExit ? `
+                        <div class="swap-item">
+                            <div class="swap-item-label">Sale:</div>
+                            <div class="swap-item-name swap-leaving">${whiteExitName}</div>
+                        </div>
+                    ` : ''}
+                    ${nextLineup.whiteEntry ? `
+                        <div class="swap-item">
+                            <div class="swap-item-label">Entra:</div>
+                            <div class="swap-item-name swap-entering">${whiteEntryName}</div>
+                        </div>
+                    ` : ''}
+                    ${!nextLineup.whiteExit && !nextLineup.whiteEntry ? `
+                        <div class="swap-item" style="font-size: 12px; opacity: 0.7;">
+                            Sin cambios
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            document.getElementById('gamePreviewModal').classList.add('active');
+        }
+
+        function confirmNextGame() {
+            const nextLineup = calculateNextLineup();
+
+            // Actualizar benches
+            if (nextLineup.blueExit) {
+                bench.push(nextLineup.blueExit);
+            }
+            if (nextLineup.whiteExit) {
+                bench.push(nextLineup.whiteExit);
+            }
+
+            // Remover de banca los que entraron
+            bench = bench.filter(p => p.id !== nextLineup.blueEntry?.id && p.id !== nextLineup.whiteEntry?.id);
+
+            // Actualizar equipos
+            blueTeam = nextLineup.nextBlueTeam;
+            whiteTeam = nextLineup.nextWhiteTeam;
+
+            // Siguiente juego
+            gameNumber++;
+            gameStartTime = new Date();
+
+            document.getElementById('gamePreviewModal').classList.remove('active');
             render();
-            showToast(`¡${winnerTeam === 'blue' ? 'Equipo Azul' : 'Equipo Blanco'} ganó el Juego #${gameNumber - 1}!`);
+            showToast(`¡Juego #${gameNumber} comenzó!`);
         }
 
         // Reset
@@ -856,6 +1019,15 @@
         function render() {
             gameNumberEl.textContent = gameNumber;
 
+            // Habilitar/deshabilitar botones de ganar
+            const canPlayGame = blueTeam.length === 5 && whiteTeam.length === 5;
+            blueWinBtn.disabled = !canPlayGame;
+            whiteWinBtn.disabled = !canPlayGame;
+            blueWinBtn.style.opacity = canPlayGame ? '1' : '0.5';
+            whiteWinBtn.style.opacity = canPlayGame ? '1' : '0.5';
+            blueWinBtn.style.cursor = canPlayGame ? 'pointer' : 'not-allowed';
+            whiteWinBtn.style.cursor = canPlayGame ? 'pointer' : 'not-allowed';
+
             // Blue Team
             if (blueTeam.length === 0) {
                 blueTeamEl.innerHTML = '<div class="empty-message">Esperando jugadores...</div>';
@@ -866,7 +1038,7 @@
                             <div class="player-name">${p.name}</div>
                             <div class="player-details">#${p.arrivalNumber} · ${p.arrivalTime}</div>
                         </div>
-                        <div class="player-games">${p.gamesPlayed}</div>
+                        <div class="player-games ${p.isLateArrival ? 'late-arrival' : ''}">${p.gamesPlayed}</div>
                     </div>
                 `).join('');
             }
@@ -881,7 +1053,7 @@
                             <div class="player-name">${p.name}</div>
                             <div class="player-details">#${p.arrivalNumber} · ${p.arrivalTime}</div>
                         </div>
-                        <div class="player-games">${p.gamesPlayed}</div>
+                        <div class="player-games ${p.isLateArrival ? 'late-arrival' : ''}">${p.gamesPlayed}</div>
                     </div>
                 `).join('');
             }
@@ -896,7 +1068,7 @@
                             <div class="bench-player-name">${p.name}</div>
                             <div class="bench-player-details">#${p.arrivalNumber} (${p.team === 'blue' ? 'Azul' : 'Blanco'})</div>
                         </div>
-                        <div class="bench-player-games">${p.gamesPlayed}</div>
+                        <div class="bench-player-games ${p.isLateArrival ? 'late-arrival' : ''}">${p.gamesPlayed}</div>
                     </div>
                 `).join('');
             }
