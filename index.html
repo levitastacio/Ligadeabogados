@@ -1203,6 +1203,14 @@
             const name = selectedMatchPlayer;
             if (!name) return;
 
+            // Verificar si el jugador ya está en algún equipo
+            const allTeamPlayers = [...team1, ...team2, ...bench];
+            if (allTeamPlayers.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+                showToast(`⚠️ ${name} ya está agregado`);
+                closeAddToMatchModal();
+                return;
+            }
+
             const arrivalNumber = nextArrivalNumber;
             const teamAssignment = nextArrivalNumber % 2 === 1 ? 'team1' : 'team2';
             const arrivalTime = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
@@ -1363,6 +1371,29 @@
             showToast(`✓ ${editingPlayerName} eliminado`);
         }
 
+        function removePlayerFromTeam(playerId, teamId) {
+            const team = teamId === 'team1' ? team1 : team2;
+            const playerToRemove = team.find(p => p.id == playerId);
+
+            if (!playerToRemove) return;
+
+            const confirmed = confirm(`¿Eliminar a "${playerToRemove.name}" del equipo?`);
+            if (!confirmed) return;
+
+            if (teamId === 'team1') {
+                team1 = team1.filter(p => p.id !== playerId);
+            } else {
+                team2 = team2.filter(p => p.id !== playerId);
+            }
+
+            // Remover de la lista de jugadores también
+            players = players.filter(p => p.id !== playerId);
+
+            saveGame();
+            render();
+            showToast(`✓ ${playerToRemove.name} eliminado del equipo`);
+        }
+
         // ==================== GAME LOGIC ====================
         function getPlayerToRemove(team) {
             if (team.length === 0) return null;
@@ -1445,29 +1476,57 @@
                 return a.arrivalNumber - b.arrivalNumber;
             });
 
-            const team1Exit = team1.length > 0 ? getPlayerToRemove(team1) : null;
-            const team2Exit = team2.length > 0 ? getPlayerToRemove(team2) : null;
+            // Calcular cuántos jugadores sacar de cada equipo
+            const team1ToRemove = Math.min(team1.length, team1Bench.length);
+            const team2ToRemove = Math.min(team2.length, team2Bench.length);
 
-            const team1Entry = team1Bench.length > 0 ? team1Bench[0] : null;
-            const team2Entry = team2Bench.length > 0 ? team2Bench[0] : null;
+            // Obtener los jugadores a sacar
+            const team1ExitList = [];
+            const team2ExitList = [];
+
+            for (let i = 0; i < team1ToRemove; i++) {
+                const playerToExit = getPlayerToRemove(team1.filter(p => !team1ExitList.find(ex => ex.id === p.id)));
+                if (playerToExit) team1ExitList.push(playerToExit);
+            }
+
+            for (let i = 0; i < team2ToRemove; i++) {
+                const playerToExit = getPlayerToRemove(team2.filter(p => !team2ExitList.find(ex => ex.id === p.id)));
+                if (playerToExit) team2ExitList.push(playerToExit);
+            }
+
+            // Obtener los jugadores a entrar
+            const team1EntryList = team1Bench.slice(0, team1ToRemove);
+            const team2EntryList = team2Bench.slice(0, team2ToRemove);
+
+            // Construir los nuevos equipos
+            let nextTeam1 = team1.filter(p => !team1ExitList.find(ex => ex.id === p.id));
+            let nextTeam2 = team2.filter(p => !team2ExitList.find(ex => ex.id === p.id));
+
+            nextTeam1 = [...nextTeam1, ...team1EntryList];
+            nextTeam2 = [...nextTeam2, ...team2EntryList];
 
             return {
-                team1Exit,
-                team2Exit,
-                team1Entry,
-                team2Entry,
-                nextTeam1: team1Entry ?
-                    [...team1.filter(p => p.id !== team1Exit?.id), team1Entry] :
-                    team1,
-                nextTeam2: team2Entry ?
-                    [...team2.filter(p => p.id !== team2Exit?.id), team2Entry] :
-                    team2
+                team1Exit: team1ExitList[0] || null,
+                team2Exit: team2ExitList[0] || null,
+                team1Entry: team1EntryList[0] || null,
+                team2Entry: team2EntryList[0] || null,
+                team1ExitList,
+                team2ExitList,
+                team1EntryList,
+                team2EntryList,
+                nextTeam1,
+                nextTeam2
             };
         }
 
         function showGamePreview(winnerTeam, nextLineup) {
             const previewEl = document.getElementById('gamePreviewContent');
             const winnerName = winnerTeam === 'team1' ? team1Name : team2Name;
+
+            const team1SalesList = nextLineup.team1ExitList.map(p => p.name).join(', ');
+            const team1EntraList = nextLineup.team1EntryList.map(p => p.name).join(', ');
+            const team2SalesList = nextLineup.team2ExitList.map(p => p.name).join(', ');
+            const team2EntraList = nextLineup.team2EntryList.map(p => p.name).join(', ');
 
             previewEl.innerHTML = `
                 <div style="background: rgba(160, 255, 0, 0.15); border-radius: 12px; padding: 14px; margin-bottom: 14px; border: 2px solid rgba(160, 255, 0, 0.25); text-align: center;">
@@ -1477,8 +1536,8 @@
 
                 <div style="background: rgba(100, 150, 255, 0.15); border-radius: 10px; padding: 12px; margin-bottom: 12px; border: 2px solid rgba(100, 150, 255, 0.25); font-size: 12px;">
                     <div style="font-weight: 900; color: #6496ff; margin-bottom: 8px;">⚽ ${team1Name}</div>
-                    ${nextLineup.team1Exit ? `<div style="margin-bottom: 4px;"><span style="opacity: 0.7;">Sale:</span> <span style="color: #ff9999; font-weight: 700;">${nextLineup.team1Exit.name}</span></div>` : ''}
-                    ${nextLineup.team1Entry ? `<div style="margin-bottom: 8px;"><span style="opacity: 0.7;">Entra:</span> <span style="color: #a0ff00; font-weight: 700;">${nextLineup.team1Entry.name}</span></div>` : ''}
+                    ${team1SalesList ? `<div style="margin-bottom: 4px;"><span style="opacity: 0.7;">Salen:</span> <span style="color: #ff9999; font-weight: 700;">${team1SalesList}</span></div>` : ''}
+                    ${team1EntraList ? `<div style="margin-bottom: 8px;"><span style="opacity: 0.7;">Entran:</span> <span style="color: #a0ff00; font-weight: 700;">${team1EntraList}</span></div>` : ''}
                     <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(100, 150, 255, 0.2); font-size: 11px; opacity: 0.85;">
                         <strong>Próximo (5):</strong> ${nextLineup.nextTeam1.map(p => p.name).join(', ')}
                     </div>
@@ -1486,8 +1545,8 @@
 
                 <div style="background: rgba(200, 200, 200, 0.15); border-radius: 10px; padding: 12px; border: 2px solid rgba(200, 200, 200, 0.25); font-size: 12px; color: #1a1a2e;">
                     <div style="font-weight: 900; color: #1a1a2e; margin-bottom: 8px;">⚽ ${team2Name}</div>
-                    ${nextLineup.team2Exit ? `<div style="margin-bottom: 4px;"><span style="opacity: 0.7;">Sale:</span> <span style="color: #ff9999; font-weight: 700;">${nextLineup.team2Exit.name}</span></div>` : ''}
-                    ${nextLineup.team2Entry ? `<div style="margin-bottom: 8px;"><span style="opacity: 0.7;">Entra:</span> <span style="color: #a0ff00; font-weight: 700;">${nextLineup.team2Entry.name}</span></div>` : ''}
+                    ${team2SalesList ? `<div style="margin-bottom: 4px;"><span style="opacity: 0.7;">Salen:</span> <span style="color: #ff9999; font-weight: 700;">${team2SalesList}</span></div>` : ''}
+                    ${team2EntraList ? `<div style="margin-bottom: 8px;"><span style="opacity: 0.7;">Entran:</span> <span style="color: #a0ff00; font-weight: 700;">${team2EntraList}</span></div>` : ''}
                     <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(100, 100, 150, 0.2); font-size: 11px; opacity: 0.85;">
                         <strong>Próximo (5):</strong> ${nextLineup.nextTeam2.map(p => p.name).join(', ')}
                     </div>
@@ -1500,10 +1559,13 @@
         function confirmNextGame() {
             const nextLineup = calculateNextLineup();
 
-            if (nextLineup.team1Exit) bench.push(nextLineup.team1Exit);
-            if (nextLineup.team2Exit) bench.push(nextLineup.team2Exit);
+            // Agregar los que salen a la banca
+            nextLineup.team1ExitList.forEach(p => bench.push(p));
+            nextLineup.team2ExitList.forEach(p => bench.push(p));
 
-            bench = bench.filter(p => p.id !== nextLineup.team1Entry?.id && p.id !== nextLineup.team2Entry?.id);
+            // Remover los que entran de la banca
+            const enteredIds = [...nextLineup.team1EntryList, ...nextLineup.team2EntryList].map(p => p.id);
+            bench = bench.filter(p => !enteredIds.includes(p.id));
 
             team1 = nextLineup.nextTeam1;
             team2 = nextLineup.nextTeam2;
@@ -1718,13 +1780,14 @@
                 el.innerHTML = '<div class="empty-message">Esperando jugadores...</div>';
             } else {
                 el.innerHTML = teamArray.map(p => `
-                    <div class="player">
+                    <div class="player" style="cursor: pointer; position: relative;" onclick="removePlayerFromTeam('${p.id}', '${teamId}')">
                         <div class="player-info">
                             <div class="player-name">${p.name}</div>
                             <div class="player-details">#${p.arrivalNumber} · ${p.arrivalTime}</div>
                         </div>
                         <div style="display: flex; gap: 8px; align-items: center;">
                             <div class="player-games ${p.isLateArrival ? 'late-arrival' : ''}">${p.gamesPlayed}</div>
+                            <div style="font-size: 12px; opacity: 0.6; margin-left: 8px;">✕</div>
                         </div>
                     </div>
                 `).join('');
