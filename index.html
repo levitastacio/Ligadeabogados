@@ -304,9 +304,20 @@
             transition: all 0.2s ease;
         }
 
+        .bench-player.white-team {
+            background: linear-gradient(135deg, #ffffff, #f8f8f8);
+            color: #1a1a2e;
+            border-color: rgba(150, 150, 180, 0.4);
+        }
+
         .bench-player:hover {
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08));
             border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .bench-player.white-team:hover {
+            background: linear-gradient(135deg, #ffffff, #f0f0f0);
+            border-color: rgba(100, 100, 150, 0.6);
         }
 
         .bench-player-info {
@@ -318,9 +329,18 @@
             margin-bottom: 2px;
         }
 
+        .bench-player.white-team .bench-player-name {
+            color: #1a1a2e;
+        }
+
         .bench-player-details {
             font-size: 11px;
             opacity: 0.65;
+        }
+
+        .bench-player.white-team .bench-player-details {
+            color: #666;
+            opacity: 1;
         }
 
         .bench-player-games {
@@ -328,6 +348,11 @@
             font-size: 14px;
             text-align: right;
             opacity: 0.85;
+        }
+
+        .bench-player.white-team .bench-player-games {
+            color: #1a1a2e;
+            opacity: 1;
         }
 
         .action-buttons {
@@ -1166,7 +1191,7 @@
                 benchPlayersEl.innerHTML = '<div class="empty-message">Sin jugadores en la banca</div>';
             } else {
                 benchPlayersEl.innerHTML = bench.map(p => `
-                    <div class="bench-player">
+                    <div class="bench-player ${p.team === 'white' ? 'white-team' : ''}">
                         <div class="bench-player-info">
                             <div class="bench-player-name">${p.name}</div>
                             <div class="bench-player-details">#${p.arrivalNumber} (${p.team === 'blue' ? 'Azul' : 'Blanco'})</div>
