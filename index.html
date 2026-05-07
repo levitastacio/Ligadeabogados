@@ -874,7 +874,25 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js"></script>
+
     <script>
+        // ==================== FIREBASE CONFIG ====================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDz9gsb9HK9nh_QWZ8WekZRaWAFKeVxBYc",
+            authDomain: "liga-de-abogados.firebaseapp.com",
+            databaseURL: "https://liga-de-abogados-default-rtdb.firebaseio.com",
+            projectId: "liga-de-abogados",
+            storageBucket: "liga-de-abogados.firebasestorage.app",
+            messagingSenderId: "983967000642",
+            appId: "1:983967000642:web:9b999be34033b824f6e5db"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         // ==================== STORAGE ====================
         const STORAGE_KEYS = {
             JORNADA: 'liaba_current_jornada',
@@ -883,13 +901,45 @@
             SETTINGS: 'liaba_settings'
         };
 
+        let useFirebase = true; // Usar Firebase por defecto
+
         function saveToStorage(key, data) {
-            localStorage.setItem(key, JSON.stringify(data));
+            if (useFirebase) {
+                database.ref(key).set(data).catch(err => {
+                    console.error('Firebase save error:', err);
+                    localStorage.setItem(key, JSON.stringify(data));
+                });
+            } else {
+                localStorage.setItem(key, JSON.stringify(data));
+            }
         }
 
         function loadFromStorage(key, defaultValue = null) {
-            const data = localStorage.getItem(key);
-            return data ? JSON.parse(data) : defaultValue;
+            // Cargar de localStorage primero (lectura síncrona)
+            const localData = localStorage.getItem(key);
+            if (localData) return JSON.parse(localData);
+
+            return defaultValue;
+        }
+
+        function loadFromFirebaseAsync(key, callback) {
+            if (!useFirebase) {
+                callback(loadFromStorage(key, null));
+                return;
+            }
+
+            database.ref(key).once('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    localStorage.setItem(key, JSON.stringify(data));
+                    callback(data);
+                } else {
+                    callback(loadFromStorage(key, null));
+                }
+            }).catch(err => {
+                console.error('Firebase load error:', err);
+                callback(loadFromStorage(key, null));
+            });
         }
 
         // ==================== STATE ====================
@@ -914,9 +964,30 @@
 
         // ==================== INITIALIZATION ====================
         function init() {
-            loadGame();
-            attachEventListeners();
-            render();
+            // Cargar datos de Firebase primero
+            loadGameFromFirebase(() => {
+                attachEventListeners();
+                render();
+                showToast('✓ Datos sincronizados');
+            });
+        }
+
+        function loadGameFromFirebase(callback) {
+            loadFromFirebaseAsync(STORAGE_KEYS.JORNADA, (saved) => {
+                if (saved) {
+                    gameNumber = saved.gameNumber;
+                    players = saved.players;
+                    nextArrivalNumber = saved.nextArrivalNumber;
+                    team1 = saved.team1;
+                    team2 = saved.team2;
+                    bench = saved.bench;
+                    gameHistory = saved.gameHistory || [];
+                    gameMode = saved.gameMode || 'normal';
+                    team1Name = saved.team1Name || 'Azul';
+                    team2Name = saved.team2Name || 'Blanco';
+                }
+                if (callback) callback();
+            });
         }
 
         function loadGame() {
