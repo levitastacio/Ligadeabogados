@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIABA - Liga de Abogados</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #2020E8;
+            color: white;
+            padding: 16px;
+            padding-bottom: 80px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding-top: 8px;
+        }
+
+        .logo {
+            font-size: 36px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+
+        .subtitle {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .game-counter {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px 16px;
+            text-align: center;
+            margin-bottom: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .game-counter-label {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-bottom: 4px;
+        }
+
+        .game-counter-number {
+            font-size: 32px;
+            font-weight: 900;
+        }
+
+        .teams-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .team {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .team-title {
+            font-size: 18px;
+            font-weight: 900;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .player {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .player.new-entry {
+            background: rgba(255, 255, 255, 0.25);
+            animation: pulse 0.6s ease-out;
+        }
+
+        .player.leaving {
+            animation: slideOut 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                background: rgba(255, 255, 255, 0.4);
+            }
+            100% {
+                background: rgba(255, 255, 255, 0.12);
+            }
+        }
+
+        .player-info {
+            flex: 1;
+        }
+
+        .player-name {
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .player-details {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        .player-games {
+            font-weight: 700;
+            font-size: 14px;
+            text-align: right;
+        }
+
+        .empty-message {
+            font-size: 12px;
+            opacity: 0.6;
+            padding: 16px;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .bench-section {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .bench-title {
+            font-size: 13px;
+            font-weight: 700;
+            opacity: 0.7;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .bench-players {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .bench-player {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bench-player-info {
+            flex: 1;
+        }
+
+        .bench-player-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .bench-player-details {
+            font-size: 10px;
+            opacity: 0.6;
+        }
+
+        .bench-player-games {
+            font-weight: 600;
+            font-size: 12px;
+            text-align: right;
+            opacity: 0.8;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 14px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-win {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-win:active {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0.98);
+        }
+
+        .btn-reset {
+            background: rgba(255, 100, 100, 0.3);
+            color: white;
+            border: 2px solid rgba(255, 100, 100, 0.4);
+            font-size: 12px;
+        }
+
+        .btn-reset:active {
+            background: rgba(255, 100, 100, 0.5);
+            transform: scale(0.98);
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: white;
+            color: #2020E8;
+            border: none;
+            font-size: 32px;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #2020E8;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 90%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 900;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 14px 12px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            margin-bottom: 16px;
+            font-family: inherit;
+        }
+
+        .modal-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: white;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .modal-confirmation {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-btn-confirm {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-btn-confirm:active {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0.98);
+        }
+
+        .modal-btn-cancel {
+            background: rgba(255, 100, 100, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 100, 100, 0.3);
+        }
+
+        .modal-btn-cancel:active {
+            background: rgba(255, 100, 100, 0.4);
+            transform: scale(0.98);
+        }
+
+        .swap-info {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 16px;
+            font-size: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .swap-info-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .swap-item {
+            margin-bottom: 6px;
+            padding: 4px 0;
+        }
+
+        .swap-item-label {
+            opacity: 0.7;
+            font-size: 10px;
+        }
+
+        .swap-item-name {
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 16px;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 14px 16px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            font-size: 13px;
+            z-index: 999;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .confirmation-dialog {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2500;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirmation-dialog.active {
+            display: flex;
+        }
+
+        .confirmation-box {
+            background: #2020E8;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 90%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .confirmation-text {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .confirmation-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .swap-entering {
+            color: #a0ff00;
+            font-weight: 700;
+        }
+
+        .swap-leaving {
+            color: #ffb0b0;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">LIABA</div>
+            <div class="subtitle">Liga de Abogados · La Vega</div>
+        </div>
+
+        <div class="game-counter">
+            <div class="game-counter-label">JUEGO</div>
+            <div class="game-counter-number" id="gameNumber">1</div>
+        </div>
+
+        <div class="teams-container">
+            <div class="team">
+                <div class="team-title">Azul</div>
+                <div class="players-list" id="blueTeam">
+                    <div class="empty-message">Esperando jugadores...</div>
+                </div>
+            </div>
+            <div class="team">
+                <div class="team-title">Blanco</div>
+                <div class="players-list" id="whiteTeam">
+                    <div class="empty-message">Esperando jugadores...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bench-section">
+            <div class="bench-title">Banca</div>
+            <div class="bench-players" id="benchPlayers">
+                <div class="empty-message">Sin jugadores en la banca</div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-win" id="blueWinBtn">Azul Ganó</button>
+            <button class="btn btn-win" id="whiteWinBtn">Blanco Ganó</button>
+            <button class="btn btn-reset" style="grid-column: 1 / -1;" id="resetBtn">Reiniciar Día</button>
+        </div>
+    </div>
+
+    <button class="fab" id="addPlayerBtn">+</button>
+
+    <!-- Add Player Modal -->
+    <div class="modal" id="addPlayerModal">
+        <div class="modal-content">
+            <div class="modal-title">Nuevo Jugador</div>
+            <input type="text" class="modal-input" id="playerNameInput" placeholder="Nombre del jugador" autocomplete="off">
+            <div id="swapPreview"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-confirm" id="confirmAddBtn">Agregar</button>
+                <button class="modal-btn modal-btn-cancel" id="cancelAddBtn">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Confirmation Dialog -->
+    <div class="confirmation-dialog" id="resetConfirmDialog">
+        <div class="confirmation-box">
+            <div class="confirmation-text">¿Estás seguro de que deseas reiniciar? Se eliminarán todos los jugadores y juegos.</div>
+            <div class="confirmation-buttons">
+                <button class="modal-btn modal-btn-cancel" id="resetCancelBtn">Cancelar</button>
+                <button class="modal-btn modal-btn-confirm" id="resetConfirmBtn">Reiniciar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let gameNumber = 1;
+        let players = [];
+        let nextArrivalNumber = 1;
+        let blueTeam = [];
+        let whiteTeam = [];
+        let bench = [];
+
+        // DOM Elements
+        const gameNumberEl = document.getElementById('gameNumber');
+        const blueTeamEl = document.getElementById('blueTeam');
+        const whiteTeamEl = document.getElementById('whiteTeam');
+        const benchPlayersEl = document.getElementById('benchPlayers');
+        const addPlayerBtn = document.getElementById('addPlayerBtn');
+        const addPlayerModal = document.getElementById('addPlayerModal');
+        const playerNameInput = document.getElementById('playerNameInput');
+        const confirmAddBtn = document.getElementById('confirmAddBtn');
+        const cancelAddBtn = document.getElementById('cancelAddBtn');
+        const blueWinBtn = document.getElementById('blueWinBtn');
+        const whiteWinBtn = document.getElementById('whiteWinBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const resetConfirmDialog = document.getElementById('resetConfirmDialog');
+        const resetConfirmBtn = document.getElementById('resetConfirmBtn');
+        const resetCancelBtn = document.getElementById('resetCancelBtn');
+        const swapPreview = document.getElementById('swapPreview');
+
+        // Initialize
+        function init() {
+            addPlayerBtn.addEventListener('click', openAddPlayerModal);
+            confirmAddBtn.addEventListener('click', confirmAddPlayer);
+            cancelAddBtn.addEventListener('click', closeAddPlayerModal);
+            blueWinBtn.addEventListener('click', () => registerGameResult('blue'));
+            whiteWinBtn.addEventListener('click', () => registerGameResult('white'));
+            resetBtn.addEventListener('click', openResetDialog);
+            resetConfirmBtn.addEventListener('click', confirmReset);
+            resetCancelBtn.addEventListener('click', closeResetDialog);
+            playerNameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') confirmAddPlayer();
+            });
+            playerNameInput.addEventListener('input', updateSwapPreview);
+            render();
+        }
+
+        // Add Player Flow
+        function openAddPlayerModal() {
+            addPlayerModal.classList.add('active');
+            playerNameInput.focus();
+            playerNameInput.value = '';
+            swapPreview.innerHTML = '';
+        }
+
+        function closeAddPlayerModal() {
+            addPlayerModal.classList.remove('active');
+        }
+
+        function updateSwapPreview() {
+            const name = playerNameInput.value.trim();
+            if (!name || (blueTeam.length < 5 && whiteTeam.length < 5)) {
+                swapPreview.innerHTML = '';
+                return;
+            }
+
+            const newTeam = nextArrivalNumber % 2 === 1 ? 'blue' : 'white';
+            const team = newTeam === 'blue' ? blueTeam : whiteTeam;
+            const targetTeam = newTeam === 'blue' ? 'Azul' : 'Blanco';
+
+            if (team.length < 5) {
+                swapPreview.innerHTML = '';
+                return;
+            }
+
+            const playerToRemove = getPlayerToRemove(team);
+            if (playerToRemove) {
+                swapPreview.innerHTML = `
+                    <div class="swap-info">
+                        <div class="swap-info-title">Cambio en ${targetTeam}</div>
+                        <div class="swap-item">
+                            <div class="swap-item-label">Entra:</div>
+                            <div class="swap-item-name swap-entering">${name}</div>
+                        </div>
+                        <div class="swap-item">
+                            <div class="swap-item-label">Sale:</div>
+                            <div class="swap-item-name swap-leaving">${playerToRemove.name}</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function confirmAddPlayer() {
+            const name = playerNameInput.value.trim();
+            if (!name) return;
+
+            const arrivalNumber = nextArrivalNumber;
+            const team = nextArrivalNumber % 2 === 1 ? 'blue' : 'white';
+            const arrivalTime = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+            const player = {
+                id: Math.random(),
+                name,
+                arrivalNumber,
+                team,
+                gamesPlayed: 0,
+                arrivalTime
+            };
+
+            players.push(player);
+            nextArrivalNumber++;
+
+            // Add to appropriate team
+            if (team === 'blue') {
+                if (blueTeam.length < 5) {
+                    blueTeam.push(player);
+                } else {
+                    const removed = getPlayerToRemove(blueTeam);
+                    if (removed) {
+                        blueTeam.splice(blueTeam.indexOf(removed), 1);
+                        bench.push(removed);
+                    }
+                    blueTeam.push(player);
+                }
+            } else {
+                if (whiteTeam.length < 5) {
+                    whiteTeam.push(player);
+                } else {
+                    const removed = getPlayerToRemove(whiteTeam);
+                    if (removed) {
+                        whiteTeam.splice(whiteTeam.indexOf(removed), 1);
+                        bench.push(removed);
+                    }
+                    whiteTeam.push(player);
+                }
+            }
+
+            // Remove from bench if was there
+            bench = bench.filter(p => p.id !== player.id);
+
+            closeAddPlayerModal();
+            render();
+            showToast(`${name} → Equipo ${team === 'blue' ? 'Azul' : 'Blanco'} (#${arrivalNumber}, llegó a las ${arrivalTime})`);
+        }
+
+        // Rotation Logic
+        function getPlayerToRemove(team) {
+            if (team.length === 0) return null;
+
+            let maxGames = Math.max(...team.map(p => p.gamesPlayed));
+            let candidates = team.filter(p => p.gamesPlayed === maxGames);
+
+            if (candidates.length === 1) return candidates[0];
+
+            // If tie, return the one with highest arrival number (latest arrival)
+            return candidates.reduce((a, b) => a.arrivalNumber > b.arrivalNumber ? a : b);
+        }
+
+        // Game Result
+        function registerGameResult(winnerTeam) {
+            // Increment games for all current players on court
+            blueTeam.forEach(p => p.gamesPlayed++);
+            whiteTeam.forEach(p => p.gamesPlayed++);
+
+            gameNumber++;
+
+            render();
+            showToast(`¡${winnerTeam === 'blue' ? 'Equipo Azul' : 'Equipo Blanco'} ganó el Juego #${gameNumber - 1}!`);
+        }
+
+        // Reset
+        function openResetDialog() {
+            resetConfirmDialog.classList.add('active');
+        }
+
+        function closeResetDialog() {
+            resetConfirmDialog.classList.remove('active');
+        }
+
+        function confirmReset() {
+            gameNumber = 1;
+            players = [];
+            nextArrivalNumber = 1;
+            blueTeam = [];
+            whiteTeam = [];
+            bench = [];
+            closeResetDialog();
+            render();
+            showToast('Día reiniciado');
+        }
+
+        // Render
+        function render() {
+            gameNumberEl.textContent = gameNumber;
+
+            // Blue Team
+            if (blueTeam.length === 0) {
+                blueTeamEl.innerHTML = '<div class="empty-message">Esperando jugadores...</div>';
+            } else {
+                blueTeamEl.innerHTML = blueTeam.map(p => `
+                    <div class="player">
+                        <div class="player-info">
+                            <div class="player-name">${p.name}</div>
+                            <div class="player-details">#${p.arrivalNumber} · ${p.arrivalTime}</div>
+                        </div>
+                        <div class="player-games">${p.gamesPlayed}</div>
+                    </div>
+                `).join('');
+            }
+
+            // White Team
+            if (whiteTeam.length === 0) {
+                whiteTeamEl.innerHTML = '<div class="empty-message">Esperando jugadores...</div>';
+            } else {
+                whiteTeamEl.innerHTML = whiteTeam.map(p => `
+                    <div class="player">
+                        <div class="player-info">
+                            <div class="player-name">${p.name}</div>
+                            <div class="player-details">#${p.arrivalNumber} · ${p.arrivalTime}</div>
+                        </div>
+                        <div class="player-games">${p.gamesPlayed}</div>
+                    </div>
+                `).join('');
+            }
+
+            // Bench
+            if (bench.length === 0) {
+                benchPlayersEl.innerHTML = '<div class="empty-message">Sin jugadores en la banca</div>';
+            } else {
+                benchPlayersEl.innerHTML = bench.map(p => `
+                    <div class="bench-player">
+                        <div class="bench-player-info">
+                            <div class="bench-player-name">${p.name}</div>
+                            <div class="bench-player-details">#${p.arrivalNumber} (${p.team === 'blue' ? 'Azul' : 'Blanco'})</div>
+                        </div>
+                        <div class="bench-player-games">${p.gamesPlayed}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Toast
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
