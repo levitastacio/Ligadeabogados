@@ -904,13 +904,14 @@
         let useFirebase = true; // Usar Firebase por defecto
 
         function saveToStorage(key, data) {
-            if (useFirebase) {
+            // Guardar en localStorage primero (rápido y confiable)
+            localStorage.setItem(key, JSON.stringify(data));
+
+            // Guardar en Firebase en background si está disponible
+            if (useFirebase && database) {
                 database.ref(key).set(data).catch(err => {
-                    console.error('Firebase save error:', err);
-                    localStorage.setItem(key, JSON.stringify(data));
+                    console.log('Firebase save pending:', err);
                 });
-            } else {
-                localStorage.setItem(key, JSON.stringify(data));
             }
         }
 
@@ -964,30 +965,20 @@
 
         // ==================== INITIALIZATION ====================
         function init() {
-            // Cargar datos de Firebase primero
-            loadGameFromFirebase(() => {
-                attachEventListeners();
-                render();
-                showToast('✓ Datos sincronizados');
-            });
+            loadGame();
+            attachEventListeners();
+            render();
+            // Sincronizar con Firebase en background
+            setTimeout(() => syncWithFirebase(), 500);
         }
 
-        function loadGameFromFirebase(callback) {
-            loadFromFirebaseAsync(STORAGE_KEYS.JORNADA, (saved) => {
-                if (saved) {
-                    gameNumber = saved.gameNumber;
-                    players = saved.players;
-                    nextArrivalNumber = saved.nextArrivalNumber;
-                    team1 = saved.team1;
-                    team2 = saved.team2;
-                    bench = saved.bench;
-                    gameHistory = saved.gameHistory || [];
-                    gameMode = saved.gameMode || 'normal';
-                    team1Name = saved.team1Name || 'Azul';
-                    team2Name = saved.team2Name || 'Blanco';
+        function syncWithFirebase() {
+            database.ref(STORAGE_KEYS.PLAYER_DB).once('value', (snapshot) => {
+                const firebaseData = snapshot.val();
+                if (firebaseData) {
+                    localStorage.setItem(STORAGE_KEYS.PLAYER_DB, JSON.stringify(firebaseData));
                 }
-                if (callback) callback();
-            });
+            }).catch(err => console.log('Firebase sync:', err));
         }
 
         function loadGame() {
