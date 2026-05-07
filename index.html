@@ -915,9 +915,14 @@
 
         // ==================== INITIALIZATION ====================
         function init() {
-            loadGame();
-            attachEventListeners();
-            render();
+            try {
+                loadGame();
+                attachEventListeners();
+                render();
+                console.log('✓ App initialized successfully');
+            } catch(err) {
+                console.error('❌ Init error:', err);
+            }
         }
 
         function loadGame() {
@@ -952,6 +957,7 @@
         }
 
         function attachEventListeners() {
+            try {
             // Tabs
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', () => switchTab(btn.dataset.tab));
@@ -1018,6 +1024,10 @@
                 closeConfirmDialog();
             });
             document.getElementById('confirmNo').addEventListener('click', closeConfirmDialog);
+            console.log('✓ Event listeners attached successfully');
+            } catch(err) {
+                console.error('❌ Event listener error:', err);
+            }
         }
 
         function switchTab(tabName) {
