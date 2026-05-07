@@ -518,12 +518,30 @@
             font-weight: 600;
         }
 
+        .swap-info.blue-team {
+            background: linear-gradient(135deg, rgba(32, 32, 200, 0.25), rgba(32, 32, 200, 0.12));
+            border-color: rgba(100, 150, 255, 0.4);
+        }
+
+        .swap-info.white-team {
+            background: linear-gradient(135deg, rgba(240, 240, 240, 0.2), rgba(220, 220, 220, 0.1));
+            border-color: rgba(200, 200, 200, 0.4);
+        }
+
         .swap-info-title {
             font-weight: 900;
             margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: #a0ff00;
+        }
+
+        .swap-info.blue-team .swap-info-title {
+            color: #6496ff;
+        }
+
+        .swap-info.white-team .swap-info-title {
+            color: #e0e0e0;
         }
 
         .swap-item {
@@ -951,7 +969,7 @@
                     </div>
                 </div>
 
-                <div class="swap-info" style="margin-bottom: 16px;">
+                <div class="swap-info blue-team" style="margin-bottom: 16px;">
                     <div class="swap-info-title">⚽ Equipo Azul</div>
                     ${nextLineup.blueExit ? `
                         <div class="swap-item">
@@ -976,7 +994,7 @@
                     </div>
                 </div>
 
-                <div class="swap-info">
+                <div class="swap-info white-team">
                     <div class="swap-info-title">⚽ Equipo Blanco</div>
                     ${nextLineup.whiteExit ? `
                         <div class="swap-item">
