@@ -898,6 +898,9 @@
             const blueEntryName = nextLineup.blueEntry?.name || 'Nadie';
             const whiteEntryName = nextLineup.whiteEntry?.name || 'Nadie';
 
+            const nextBlueList = nextLineup.nextBlueTeam.map(p => p.name).join(', ');
+            const nextWhiteList = nextLineup.nextWhiteTeam.map(p => p.name).join(', ');
+
             previewEl.innerHTML = `
                 <div class="modal-confirmation">
                     <div style="font-weight: 700; color: #a0ff00; margin-bottom: 12px;">
@@ -927,6 +930,10 @@
                             Sin cambios
                         </div>
                     ` : ''}
+                    <div class="swap-item" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(160, 255, 0, 0.2);">
+                        <div class="swap-item-label" style="color: #a0ff00;">Próximo Equipo (5):</div>
+                        <div style="font-size: 13px; margin-top: 6px; line-height: 1.5;">${nextBlueList}</div>
+                    </div>
                 </div>
 
                 <div class="swap-info">
@@ -948,6 +955,10 @@
                             Sin cambios
                         </div>
                     ` : ''}
+                    <div class="swap-item" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(160, 255, 0, 0.2);">
+                        <div class="swap-item-label" style="color: #a0ff00;">Próximo Equipo (5):</div>
+                        <div style="font-size: 13px; margin-top: 6px; line-height: 1.5;">${nextWhiteList}</div>
+                    </div>
                 </div>
             `;
 
