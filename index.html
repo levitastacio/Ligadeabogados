@@ -803,33 +803,20 @@
             players.push(player);
             nextArrivalNumber++;
 
-            // Add to appropriate team
+            // Add to appropriate team - si hay espacio en cancha, agrega ahí; sino va a banca
             if (team === 'blue') {
                 if (blueTeam.length < 5) {
                     blueTeam.push(player);
                 } else {
-                    const removed = getPlayerToRemove(blueTeam);
-                    if (removed) {
-                        blueTeam.splice(blueTeam.indexOf(removed), 1);
-                        bench.push(removed);
-                    }
-                    blueTeam.push(player);
+                    bench.push(player);
                 }
             } else {
                 if (whiteTeam.length < 5) {
                     whiteTeam.push(player);
                 } else {
-                    const removed = getPlayerToRemove(whiteTeam);
-                    if (removed) {
-                        whiteTeam.splice(whiteTeam.indexOf(removed), 1);
-                        bench.push(removed);
-                    }
-                    whiteTeam.push(player);
+                    bench.push(player);
                 }
             }
-
-            // Remove from bench if was there
-            bench = bench.filter(p => p.id !== player.id);
 
             closeAddPlayerModal();
             render();
