@@ -105,9 +105,49 @@
             transition: all 0.3s ease;
         }
 
+        .team:nth-child(2) {
+            background: linear-gradient(135deg, #ffffff, #f5f5f5);
+            color: #1a1a2e;
+            border-color: rgba(200, 200, 200, 0.6);
+        }
+
+        .team:nth-child(2) .team-title {
+            color: #1a1a2e;
+            text-shadow: none;
+        }
+
+        .team:nth-child(2) .player {
+            background: linear-gradient(135deg, rgba(100, 100, 150, 0.1), rgba(80, 80, 120, 0.05));
+            color: #1a1a2e;
+            border-color: rgba(100, 100, 150, 0.2);
+        }
+
+        .team:nth-child(2) .player-name {
+            color: #1a1a2e;
+        }
+
+        .team:nth-child(2) .player-details {
+            color: #666;
+        }
+
+        .team:nth-child(2) .player-games {
+            background: linear-gradient(135deg, rgba(100, 100, 150, 0.15), rgba(80, 80, 120, 0.08));
+            color: #1a1a2e;
+            text-shadow: none;
+        }
+
+        .team:nth-child(2) .empty-message {
+            color: #666;
+        }
+
         .team:hover {
             border-color: rgba(255, 255, 255, 0.4);
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .team:nth-child(2):hover {
+            border-color: rgba(100, 100, 150, 0.8);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(100, 100, 150, 0.1);
         }
 
         .team-title {
