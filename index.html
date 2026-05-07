@@ -1054,7 +1054,8 @@
                 team2Name = 'Blanco';
                 document.getElementById('team1Title').textContent = 'Azul';
                 document.getElementById('team2Title').textContent = 'Blanco';
-                document.getElementById('teamSelectorContainer').style.display = 'none';
+                const selectorContainer = document.getElementById('teamSelectorContainer');
+                if (selectorContainer) selectorContainer.style.display = 'none';
             }
             saveGame();
         }
