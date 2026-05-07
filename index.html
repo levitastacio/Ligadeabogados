@@ -861,6 +861,19 @@
         </div>
     </div>
 
+    <!-- Edit Player Modal -->
+    <div class="modal" id="editPlayerModal">
+        <div class="modal-content">
+            <div class="modal-title">Editar Jugador</div>
+            <input type="text" class="modal-input" id="editPlayerNameInput" placeholder="Nombre del jugador" autocomplete="off">
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" id="cancelEditBtn">Cancelar</button>
+                <button class="modal-btn modal-btn-confirm" id="confirmEditBtn">Guardar</button>
+                <button class="modal-btn" id="deletePlayerBtn" style="grid-column: 1 / -1; background: linear-gradient(135deg, rgba(255, 100, 100, 0.25), rgba(255, 100, 100, 0.1)); border-color: rgba(255, 100, 100, 0.4);">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ==================== STORAGE ====================
         const STORAGE_KEYS = {
@@ -897,6 +910,7 @@
         let timerInterval = null;
         let selectedTeam = 'team1';
         let gameHistory = [];
+        let editingPlayerName = null;
 
         // ==================== INITIALIZATION ====================
         function init() {
@@ -972,6 +986,14 @@
             });
             document.getElementById('matchPlayerSearchInput').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter' && selectedMatchPlayer) confirmAddToMatch();
+            });
+
+            // Edit player modal
+            document.getElementById('confirmEditBtn').addEventListener('click', confirmEditPlayer);
+            document.getElementById('cancelEditBtn').addEventListener('click', closeEditPlayerModal);
+            document.getElementById('deletePlayerBtn').addEventListener('click', deletePlayer);
+            document.getElementById('editPlayerNameInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') confirmEditPlayer();
             });
             document.getElementById('playerSearchInput').addEventListener('input', filterPlayerDatabase);
             document.getElementById('viewAsistenciaBtn').addEventListener('click', showAsistencia);
@@ -1260,7 +1282,7 @@
             }
 
             container.innerHTML = filtered.map((p, index) => `
-                <div class="db-player-item" onclick="selectPlayerFromDB('${p.name}')">
+                <div class="db-player-item" onclick="openEditPlayerModal('${p.name}')">
                     <div>
                         <div style="font-weight: 700;">${p.name}</div>
                         <div style="font-size: 11px; opacity: 0.7;">${p.totalGames} juegos · ${p.totalJornadas} jornadas</div>
@@ -1276,9 +1298,69 @@
             renderPlayerDatabase();
         }
 
-        function selectPlayerFromDB(playerName) {
-            // Este comentario solo se usa desde el modal de JORNADA
-            // Desde JUGADORES se usa selectMatchPlayer
+        function openEditPlayerModal(playerName) {
+            editingPlayerName = playerName;
+            document.getElementById('editPlayerNameInput').value = playerName;
+            document.getElementById('editPlayerModal').classList.add('active');
+            document.getElementById('editPlayerNameInput').focus();
+        }
+
+        function closeEditPlayerModal() {
+            document.getElementById('editPlayerModal').classList.remove('active');
+            editingPlayerName = null;
+        }
+
+        function confirmEditPlayer() {
+            const newName = document.getElementById('editPlayerNameInput').value.trim();
+            if (!newName || !editingPlayerName) return;
+
+            if (newName === editingPlayerName) {
+                closeEditPlayerModal();
+                return;
+            }
+
+            let db = loadFromStorage(STORAGE_KEYS.PLAYER_DB, []);
+            const playerIndex = db.findIndex(p => p.name === editingPlayerName);
+
+            if (playerIndex !== -1) {
+                // Verificar que el nuevo nombre no exista
+                if (db.some(p => p.name.toLowerCase() === newName.toLowerCase() && p.name !== editingPlayerName)) {
+                    showToast('⚠️ Este nombre ya existe');
+                    return;
+                }
+
+                // Actualizar en la base de datos
+                db[playerIndex].name = newName;
+                saveToStorage(STORAGE_KEYS.PLAYER_DB, db);
+
+                // Actualizar en la jornada actual si está presente
+                [...team1, ...team2, ...bench].forEach(p => {
+                    if (p.name === editingPlayerName) {
+                        p.name = newName;
+                    }
+                });
+
+                saveGame();
+                renderPlayerDatabase();
+                render();
+                closeEditPlayerModal();
+                showToast(`✓ ${editingPlayerName} → ${newName}`);
+            }
+        }
+
+        function deletePlayer() {
+            if (!editingPlayerName) return;
+
+            const confirmed = confirm(`¿Eliminar "${editingPlayerName}" del directorio?`);
+            if (!confirmed) return;
+
+            let db = loadFromStorage(STORAGE_KEYS.PLAYER_DB, []);
+            db = db.filter(p => p.name !== editingPlayerName);
+            saveToStorage(STORAGE_KEYS.PLAYER_DB, db);
+
+            renderPlayerDatabase();
+            closeEditPlayerModal();
+            showToast(`✓ ${editingPlayerName} eliminado`);
         }
 
         // ==================== GAME LOGIC ====================
