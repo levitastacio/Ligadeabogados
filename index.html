@@ -337,6 +337,19 @@
             transform: scale(0.96);
         }
 
+        .btn-start {
+            background: linear-gradient(135deg, rgba(160, 255, 0, 0.35), rgba(160, 255, 0, 0.15));
+            color: white;
+            border-color: rgba(160, 255, 0, 0.45);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            grid-column: 1 / -1;
+        }
+
+        .btn-start:active {
+            background: linear-gradient(135deg, rgba(160, 255, 0, 0.5), rgba(160, 255, 0, 0.25));
+            transform: scale(0.96);
+        }
+
         .fab {
             position: fixed;
             bottom: 16px;
@@ -637,6 +650,10 @@
         </div>
 
         <div class="action-buttons">
+            <button class="btn btn-start" style="grid-column: 1 / -1; display: none;" id="startGameBtn">Iniciar Juego</button>
+            <div id="timerDisplay" style="grid-column: 1 / -1; text-align: center; font-size: 24px; font-weight: 900; display: none; padding: 16px; color: #a0ff00;">
+                ⏱️ 00:00
+            </div>
             <button class="btn btn-win" id="blueWinBtn">Azul Ganó</button>
             <button class="btn btn-win" id="whiteWinBtn">Blanco Ganó</button>
             <button class="btn btn-reset" style="grid-column: 1 / -1;" id="resetBtn">Reiniciar Día</button>
@@ -691,6 +708,8 @@
         let bench = [];
         let gameStartTime = null;
         let previousGameDuration = null;
+        let gameInProgress = false;
+        let timerInterval = null;
 
         // DOM Elements
         const gameNumberEl = document.getElementById('gameNumber');
@@ -720,6 +739,7 @@
             resetBtn.addEventListener('click', openResetDialog);
             resetConfirmBtn.addEventListener('click', confirmReset);
             resetCancelBtn.addEventListener('click', closeResetDialog);
+            document.getElementById('startGameBtn').addEventListener('click', startGame);
             document.getElementById('previewConfirmBtn').addEventListener('click', confirmNextGame);
             document.getElementById('previewCancelBtn').addEventListener('click', () => {
                 document.getElementById('gamePreviewModal').classList.remove('active');
@@ -728,8 +748,24 @@
                 if (e.key === 'Enter') confirmAddPlayer();
             });
             playerNameInput.addEventListener('input', updateSwapPreview);
-            gameStartTime = new Date();
             render();
+        }
+
+        function startGame() {
+            gameInProgress = true;
+            gameStartTime = new Date();
+
+            // Iniciar cronómetro
+            timerInterval = setInterval(() => {
+                const elapsed = new Date() - gameStartTime;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                document.getElementById('timerDisplay').textContent = `⏱️ ${timeStr}`;
+            }, 1000);
+
+            render();
+            showToast(`¡Juego #${gameNumber} en progreso!`);
         }
 
         // Add Player Flow
@@ -838,6 +874,10 @@
 
         // Game Result
         function registerGameResult(winnerTeam) {
+            // Detener cronómetro
+            clearInterval(timerInterval);
+            gameInProgress = false;
+
             // Calcular duración
             const now = new Date();
             const durationMs = now - gameStartTime;
@@ -985,11 +1025,12 @@
 
             // Siguiente juego
             gameNumber++;
-            gameStartTime = new Date();
+            gameInProgress = false;
+            gameStartTime = null;
 
             document.getElementById('gamePreviewModal').classList.remove('active');
             render();
-            showToast(`¡Juego #${gameNumber} comenzó!`);
+            showToast(`¡Juego #${gameNumber} listo para iniciar!`);
         }
 
         // Reset
@@ -1017,8 +1058,14 @@
         function render() {
             gameNumberEl.textContent = gameNumber;
 
+            const canStartGame = blueTeam.length === 5 && whiteTeam.length === 5 && !gameInProgress;
+            const canPlayGame = gameInProgress;
+
+            // Mostrar/ocultar botón de iniciar y cronómetro
+            document.getElementById('startGameBtn').style.display = canStartGame ? 'block' : 'none';
+            document.getElementById('timerDisplay').style.display = gameInProgress ? 'block' : 'none';
+
             // Habilitar/deshabilitar botones de ganar
-            const canPlayGame = blueTeam.length === 5 && whiteTeam.length === 5;
             blueWinBtn.disabled = !canPlayGame;
             whiteWinBtn.disabled = !canPlayGame;
             blueWinBtn.style.opacity = canPlayGame ? '1' : '0.5';
