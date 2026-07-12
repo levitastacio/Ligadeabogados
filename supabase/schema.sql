@@ -814,6 +814,21 @@ begin
     limit 3
     on conflict do nothing;
 
+    -- Publicar en el feed del grupo las medallas de oro recien otorgadas
+    insert into feed_events (user_id, group_id, type, payload)
+    select m.user_id, g.id, 'medalla',
+           jsonb_build_object('code', m.code, 'rank', m.rank, 'value', m.value, 'month', p_month)
+    from medals m
+    where m.group_id = g.id and m.month = p_month and m.rank = 1
+      and not exists (
+        select 1 from feed_events fe
+        where fe.group_id = g.id
+          and fe.type = 'medalla'
+          and fe.user_id = m.user_id
+          and fe.payload->>'code' = m.code
+          and fe.payload->>'month' = p_month
+      );
+
   end loop;
 
   -- ===== MEDALLAS DE SUPERACION PERSONAL (group_id null) =====
