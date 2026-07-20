@@ -296,6 +296,97 @@
     color: var(--ivory-dim);
   }
 
+  /* ── Diapositivas de contenido (partes del equipo) ── */
+  .lesson {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center;
+    gap: 2.2vmin;
+    padding: 5vmin 10vw 13vh;
+    text-align: left;
+  }
+  .who {
+    font-family: var(--utility);
+    font-size: clamp(0.58rem, 1.5vmin, 0.82rem);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ivory-dim);
+  }
+  .who strong { color: var(--amber); font-weight: 400; }
+
+  .qa {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.3em 1.2em;
+    align-items: baseline;
+    padding: clamp(0.6rem, 2vmin, 1.2rem) clamp(0.8rem, 2.4vmin, 1.5rem);
+    border-left: 2px solid rgba(240, 231, 213, 0.15);
+    opacity: 0;
+    max-width: 62em;
+  }
+  .qa.on { animation: roleIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards; border-left-color: var(--terra); }
+  .qa-num {
+    font-family: var(--display);
+    font-size: clamp(1.2rem, 3.6vmin, 2.2rem);
+    color: var(--terra);
+    line-height: 1;
+  }
+  .qa-q {
+    font-family: var(--display);
+    font-size: clamp(1.05rem, 3vmin, 1.8rem);
+    line-height: 1.15;
+  }
+  .qa-a {
+    grid-column: 2;
+    font-size: clamp(0.82rem, 2.1vmin, 1.1rem);
+    line-height: 1.6;
+    color: var(--ivory-dim);
+  }
+  .qa-a strong { color: var(--ivory); font-weight: 400; }
+  .qa-a em { color: var(--terra); font-style: italic; }
+
+  .chips {
+    grid-column: 2;
+    display: flex; flex-wrap: wrap;
+    gap: 0.5em;
+    margin-top: 0.5em;
+  }
+  .chip {
+    font-family: var(--utility);
+    font-size: clamp(0.55rem, 1.4vmin, 0.75rem);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(240, 231, 213, 0.7);
+    border: 1px solid rgba(206, 123, 82, 0.4);
+    border-radius: 2em;
+    padding: 0.35em 0.9em;
+    white-space: nowrap;
+  }
+
+  .conclusion {
+    max-width: 56em;
+    margin-top: 1vmin;
+    padding: clamp(0.8rem, 2.4vmin, 1.4rem) clamp(1rem, 2.8vmin, 1.8rem);
+    background: rgba(206, 123, 82, 0.09);
+    border-left: 2px solid var(--amber);
+    font-family: var(--display);
+    font-style: italic;
+    font-size: clamp(0.95rem, 2.6vmin, 1.5rem);
+    line-height: 1.5;
+    color: var(--ivory);
+    opacity: 0;
+  }
+  .conclusion.on { animation: roleIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+
+  .role-who {
+    grid-column: 2;
+    font-family: var(--utility);
+    font-size: clamp(0.55rem, 1.4vmin, 0.75rem);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--amber);
+  }
+
   /* ── D6 · Cierre / amanecer ── */
   .close-block {
     position: absolute; left: 0; right: 0; top: 14vh;
@@ -393,7 +484,7 @@
   </section>
 
   <!-- ═══════════ D2 · EL NOMBRE · anillo griego ═══════════ -->
-  <section class="slide" data-exit="exit-lift" data-compass="60">
+  <section class="slide" data-exit="exit-lift" data-compass="51">
     <div class="scene" data-scene="night"></div>
     <div class="content">
       <div class="split">
@@ -416,7 +507,7 @@
   </section>
 
   <!-- ═══════════ D3 · ESTA SEMANA · papiro ═══════════ -->
-  <section class="slide" data-exit="exit-blur" data-compass="140">
+  <section class="slide" data-exit="exit-blur" data-compass="103">
     <div class="scene" data-scene="night"></div>
     <div class="content">
       <div class="papyrus-stage">
@@ -433,7 +524,7 @@
   </section>
 
   <!-- ═══════════ D4 · LA DINÁMICA · odeón ═══════════ -->
-  <section class="slide" data-exit="exit-fade" data-compass="220">
+  <section class="slide" data-exit="exit-fade" data-compass="154">
     <div class="scene cue-scene" data-cue="0" data-scene="odeon"></div>
     <div class="content">
       <div class="odeon-copy">
@@ -449,7 +540,7 @@
   </section>
 
   <!-- ═══ D5 · LOS 4 ENFOQUES · rueda (clic revela cada uno) ═══ -->
-  <section class="slide" data-exit="exit-zoom" data-compass="300">
+  <section class="slide" data-exit="exit-zoom" data-compass="206">
     <div class="scene" data-scene="night"></div>
     <div class="content">
       <div class="wheel-layout">
@@ -465,6 +556,7 @@
             <span class="role-num">Ⅱ</span>
             <span class="role-title">Contexto</span>
             <span class="role-desc">Corinto, Pablo y la iglesia: el trasfondo que hace que el pasaje cobre vida.</span>
+            <span class="role-who">Expone · Amilka</span>
           </div>
           <div class="role frag" data-arc="2">
             <span class="role-num">Ⅲ</span>
@@ -481,7 +573,73 @@
     </div>
   </section>
 
-  <!-- ═══════════ D6 · CIERRE · amanecer + laurel ═══════════ -->
+  <!-- ═══════ D6 · CONTEXTO DE LA CARTA · parte de Amilka ═══════ -->
+  <section class="slide" data-exit="exit-lift" data-compass="257">
+    <div class="scene" data-scene="night"></div>
+    <div class="content">
+      <span class="greek-back cue-focus" data-cue="200" aria-hidden="true" style="color: rgba(240,231,213,0.035);">ΚΟΡΙΝΘΟΣ</span>
+      <div class="lesson">
+        <p class="who cue-widen" data-cue="0" style="letter-spacing: 0.3em;">Enfoque Ⅱ · Contexto — expone <strong>Amilka</strong></p>
+        <h2 class="display-lg cue-wipe" data-cue="300">Contexto de la carta</h2>
+        <div class="qa frag">
+          <span class="qa-num">1</span>
+          <span class="qa-q">¿Quién escribió la carta?</span>
+          <span class="qa-a">El apóstol <strong>Pablo, junto con Sóstenes</strong>, escribe con autoridad
+            apostólica pero también con <em>afecto pastoral</em> hacia una iglesia que él mismo fundó.</span>
+        </div>
+        <div class="qa frag">
+          <span class="qa-num">2</span>
+          <span class="qa-q">¿A quién fue dirigida?</span>
+          <span class="qa-a">A la iglesia de Dios en Corinto: <strong>«santificados en Cristo Jesús,
+            llamados a ser santos»</strong>, junto con todos los que invocan el nombre del Señor.</span>
+        </div>
+        <div class="qa frag">
+          <span class="qa-num">3</span>
+          <span class="qa-q">¿Cómo era la iglesia de Corinto?</span>
+          <span class="qa-a">Una comunidad <strong>enriquecida en dones espirituales</strong>, pero marcada
+            por divisiones, orgullo, inmoralidad y conflictos internos.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ D7 · LA MISERICORDIA DE DIOS · parte de Amilka ═══ -->
+  <section class="slide" data-exit="exit-blur" data-compass="309">
+    <div class="scene" data-scene="night"></div>
+    <div class="content">
+      <span class="greek-back cue-focus" data-cue="200" aria-hidden="true" style="font-size: clamp(3rem, 13vw, 12rem); color: rgba(240,231,213,0.04);">ΠΙΣΤΟΣ Ο ΘΕΟΣ</span>
+      <div class="lesson">
+        <p class="who cue-widen" data-cue="0" style="letter-spacing: 0.3em;">Desarrollo del tema — expone <strong>Amilka</strong></p>
+        <h2 class="display-lg cue-wipe" data-cue="300">La misericordia de Dios</h2>
+        <p class="lede cue-rise" data-cue="700" style="max-width: 40em;">Dios sigue tratando con una iglesia llena de problemas.</p>
+        <div class="qa frag">
+          <span class="qa-num">Ⅰ</span>
+          <span class="qa-q">La gracia precede al mérito</span>
+          <span class="qa-a">Pablo agradece a Dios por la iglesia <strong>antes</strong> de corregirla (v. 4).
+            La misericordia divina <em>no espera</em> que el creyente se ordene primero.</span>
+        </div>
+        <div class="qa frag">
+          <span class="qa-num">Ⅱ</span>
+          <span class="qa-q">Los dones no sustituyen la madurez</span>
+          <span class="qa-a">Corinto era rica «en toda palabra y en toda ciencia» (v. 5), pero inmadura.
+            <strong>Dios sostiene a los débiles mientras crecen.</strong></span>
+          <span class="chips">
+            <span class="chip">Divisiones</span><span class="chip">Orgullo espiritual</span><span class="chip">Inmoralidad</span><span class="chip">Pleitos</span><span class="chip">Abuso de la libertad</span><span class="chip">Confusión doctrinal</span>
+          </span>
+        </div>
+        <div class="qa frag">
+          <span class="qa-num">Ⅲ</span>
+          <span class="qa-q">La fidelidad de Dios, no la nuestra</span>
+          <span class="qa-a"><strong>«Fiel es Dios»</strong> (v. 9): la esperanza de la iglesia descansa en el
+            <em>carácter de Dios</em>, no en el desempeño de la congregación.</span>
+        </div>
+        <p class="conclusion frag">La paciencia de Dios con Corinto revela que su misericordia sostiene
+          a la iglesia no por su perfección, sino por su fidelidad inmutable.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ D8 · CIERRE · amanecer + sello ═══════════ -->
   <section class="slide" data-exit="exit-fade" data-compass="360">
     <div class="scene cue-scene" data-cue="0" data-scene="temple-dawn"></div>
     <div class="content">
