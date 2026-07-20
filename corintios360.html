@@ -7,18 +7,21 @@
 <style>
   /* ═══════════════════════════════════════════════════════════════
      CORINTIOS 360 · presentación
-     Paleta: tinta #0B0E14 · marfil #EDE6D6 · oro #C9A227
-             bronce #8A6D2F · egeo #2E6E8E
+     Narrativa visual: del atardecer (portada) a la noche de estudio
+     y al amanecer (cierre). Corinto real: Templo de Apolo, papiro,
+     odeón, laurel.
+     Paleta: tinta #0E1420 · marfil #F0E7D5 · terracota #CE7B52
+             ámbar #C97B3C · oro #C9A227 · vino #4A2530
      ═══════════════════════════════════════════════════════════════ */
   :root {
-    --ink: #0B0E14;
-    --ink-2: #11151E;
-    --ivory: #EDE6D6;
-    --ivory-dim: rgba(237, 230, 214, 0.55);
+    --ink: #0E1420;
+    --ink-deep: #090D15;
+    --ivory: #F0E7D5;
+    --ivory-dim: rgba(240, 231, 213, 0.62);
+    --terra: #CE7B52;
+    --amber: #C97B3C;
     --gold: #C9A227;
-    --gold-soft: rgba(201, 162, 39, 0.35);
-    --bronze: #8A6D2F;
-    --aegean: #2E6E8E;
+    --wine: #4A2530;
     --display: 'Didot', 'Bodoni MT', 'Playfair Display', 'Georgia', serif;
     --body: 'Georgia', 'Times New Roman', serif;
     --utility: 'Avenir Next', 'Futura', 'Gill Sans', 'Segoe UI', sans-serif;
@@ -29,7 +32,7 @@
   html, body {
     height: 100%;
     overflow: hidden;
-    background: var(--ink);
+    background: var(--ink-deep);
     color: var(--ivory);
     font-family: var(--body);
     -webkit-font-smoothing: antialiased;
@@ -37,73 +40,60 @@
 
   body { cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
 
-  /* ── Fondo: polvo dorado (canvas) + anillo de compás ── */
-  #dust {
-    position: fixed; inset: 0; z-index: 0;
-    width: 100%; height: 100%;
-  }
+  #stars { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; }
 
-  #compass {
-    position: fixed; z-index: 1;
-    top: 50%; left: 50%;
-    width: 160vmin; height: 160vmin;
-    transform: translate(-50%, -50%) rotate(0deg);
-    transition: transform 1.6s cubic-bezier(0.22, 1, 0.36, 1);
-    opacity: 0.5;
-    pointer-events: none;
-  }
-
-  /* ── Escenario de diapositivas ── */
+  /* ── Escenario ── */
   .stage { position: fixed; inset: 0; z-index: 2; }
 
   .slide {
     position: absolute; inset: 0;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    text-align: center;
-    padding: 6vmin 8vmin 14vmin;
-    visibility: hidden;
-    opacity: 0;
+    visibility: hidden; opacity: 0;
+    overflow: hidden;
   }
   .slide.active { visibility: visible; opacity: 1; }
   .slide.leaving { visibility: visible; }
 
-  /* ── Salidas (aplicadas a la diapositiva que se va) ── */
-  .leaving.exit-fade   { animation: exFade   0.65s cubic-bezier(0.55, 0, 0.55, 0.2) forwards; }
-  .leaving.exit-zoom   { animation: exZoom   0.75s cubic-bezier(0.7, 0, 0.84, 0)   forwards; }
-  .leaving.exit-lift   { animation: exLift   0.7s  cubic-bezier(0.7, 0, 0.3, 1)    forwards; }
-  .leaving.exit-blur   { animation: exBlur   0.7s  ease-in forwards; }
+  /* Escena ilustrada de fondo de cada diapositiva */
+  .scene { position: absolute; inset: 0; z-index: 0; }
+  .scene svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 
+  .content { position: absolute; inset: 0; z-index: 1; }
+
+  /* ── Salidas ── */
+  .leaving.exit-fade { animation: exFade 0.65s cubic-bezier(0.55, 0, 0.55, 0.2) forwards; }
+  .leaving.exit-zoom { animation: exZoom 0.75s cubic-bezier(0.7, 0, 0.84, 0) forwards; }
+  .leaving.exit-lift { animation: exLift 0.7s cubic-bezier(0.7, 0, 0.3, 1) forwards; }
+  .leaving.exit-blur { animation: exBlur 0.7s ease-in forwards; }
   @keyframes exFade { to { opacity: 0; } }
-  @keyframes exZoom { to { opacity: 0; transform: scale(1.7); filter: blur(14px); } }
-  @keyframes exLift { to { opacity: 0; transform: translateY(-9vh); } }
-  @keyframes exBlur { to { opacity: 0; filter: blur(20px); transform: scale(0.94); } }
+  @keyframes exZoom { to { opacity: 0; transform: scale(1.5); filter: blur(12px); } }
+  @keyframes exLift { to { opacity: 0; transform: translateY(-8vh); } }
+  @keyframes exBlur { to { opacity: 0; filter: blur(18px); transform: scale(0.95); } }
 
-  /* ── Piezas coreografiadas: estado inicial ──
-     Cada elemento con [data-cue] entra escalonado al activarse la diapositiva. */
+  /* ── Coreografía de entrada ── */
   .active [data-cue] { animation-fill-mode: both; }
+  .active .cue-rise  { animation: rise  0.95s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .active .cue-wipe  { animation: wipe  1.0s  cubic-bezier(0.77, 0, 0.18, 1) both; }
+  .active .cue-focus { animation: focus 1.1s  cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .active .cue-trace { animation: trace 1.2s  cubic-bezier(0.65, 0, 0.35, 1) both; }
+  .active .cue-widen { animation: widen 1.3s  cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .active .cue-scene { animation: sceneIn 1.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .active .cue-drop  { animation: drop 1.1s cubic-bezier(0.34, 1.3, 0.5, 1) both; }
 
-  .active .cue-rise    { animation: rise    0.9s  cubic-bezier(0.22, 1, 0.36, 1) both; }
-  .active .cue-wipe    { animation: wipe    1.0s  cubic-bezier(0.77, 0, 0.18, 1) both; }
-  .active .cue-focus   { animation: focus   1.1s  cubic-bezier(0.22, 1, 0.36, 1) both; }
-  .active .cue-trace   { animation: trace   1.2s  cubic-bezier(0.65, 0, 0.35, 1) both; }
-  .active .cue-widen   { animation: widen   1.3s  cubic-bezier(0.22, 1, 0.36, 1) both; }
-
-  @keyframes rise  { from { opacity: 0; transform: translateY(5.5vh); } to { opacity: 1; transform: none; } }
-  @keyframes wipe  { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
-  @keyframes focus { from { opacity: 0; filter: blur(18px); transform: scale(1.12); }
-                     to   { opacity: 1; filter: blur(0);    transform: none; } }
+  @keyframes rise  { from { opacity: 0; transform: translateY(5vh); } to { opacity: 1; transform: none; } }
+  @keyframes wipe  { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 -2% 0 0); } }
+  @keyframes focus { from { opacity: 0; filter: blur(16px); transform: scale(1.1); }
+                     to   { opacity: 1; filter: blur(0); transform: none; } }
   @keyframes trace { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-  @keyframes widen { from { opacity: 0; letter-spacing: 1.6em; filter: blur(6px); }
+  @keyframes widen { from { opacity: 0; letter-spacing: 1.4em; filter: blur(5px); }
                      to   { opacity: 1; letter-spacing: 0.42em; filter: blur(0); } }
+  @keyframes sceneIn { from { opacity: 0; transform: scale(1.06) translateY(2vh); }
+                       to   { opacity: 1; transform: none; } }
+  @keyframes drop { from { opacity: 0; transform: translateY(-4vh) rotate(-3.5deg); }
+                    to   { opacity: 1; transform: rotate(-1.2deg); } }
 
-  /* Letras del título de portada, una a una */
-  .active .glyph {
-    display: inline-block;
-    animation: glyphIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
+  .active .glyph { display: inline-block; animation: glyphIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) both; }
   @keyframes glyphIn {
-    from { opacity: 0; transform: translateY(0.55em) rotateX(70deg) scale(1.25); filter: blur(8px); }
+    from { opacity: 0; transform: translateY(0.5em) rotateX(65deg) scale(1.2); filter: blur(7px); }
     to   { opacity: 1; transform: none; filter: blur(0); }
   }
 
@@ -113,165 +103,246 @@
     font-size: clamp(0.6rem, 1.6vmin, 0.95rem);
     letter-spacing: 0.42em;
     text-transform: uppercase;
-    color: var(--gold);
-    text-wrap: balance;
+    color: var(--terra);
   }
 
   .display-xl {
     font-family: var(--display);
     font-weight: 400;
-    font-size: clamp(3rem, 13vmin, 9.5rem);
-    line-height: 0.98;
-    letter-spacing: 0.01em;
-    text-wrap: balance;
+    font-size: clamp(3.2rem, 14vmin, 10.5rem);
+    line-height: 0.95;
+    letter-spacing: 0.005em;
   }
 
   .display-lg {
     font-family: var(--display);
     font-weight: 400;
-    font-size: clamp(2rem, 7.5vmin, 5.2rem);
-    line-height: 1.05;
+    font-size: clamp(2rem, 7vmin, 4.8rem);
+    line-height: 1.06;
     text-wrap: balance;
   }
 
   .lede {
-    font-size: clamp(1rem, 2.6vmin, 1.45rem);
-    line-height: 1.65;
+    font-size: clamp(0.98rem, 2.5vmin, 1.4rem);
+    line-height: 1.68;
     color: var(--ivory-dim);
-    max-width: 34em;
-    text-wrap: balance;
+    max-width: 30em;
+    text-wrap: pretty;
   }
   .lede strong { color: var(--ivory); font-weight: 400; }
-  .lede em { color: var(--gold); font-style: italic; }
+  .lede em { color: var(--terra); font-style: italic; }
 
   .rule {
-    width: clamp(70px, 14vmin, 150px);
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    transform-origin: center;
+    width: clamp(60px, 12vmin, 130px); height: 1px;
+    background: linear-gradient(90deg, var(--terra), transparent);
+    transform-origin: left center;
   }
 
-  .num-giant {
+  /* ── D1 · Portada: composición inferior-izquierda sobre el templo ── */
+  .cover-block {
+    position: absolute; left: 7vw; bottom: 16vh;
+    display: flex; flex-direction: column; gap: 2.4vmin;
+    text-align: left; max-width: 86vw;
+  }
+  .cover-title { display: flex; flex-direction: column; }
+  .cover-360 {
     font-family: var(--display);
-    font-size: clamp(6rem, 26vmin, 19rem);
-    line-height: 0.9;
+    font-size: clamp(3.2rem, 14vmin, 10.5rem);
+    line-height: 0.95;
     color: transparent;
-    -webkit-text-stroke: 1px var(--gold-soft);
-    text-stroke: 1px var(--gold-soft);
+    -webkit-text-stroke: 2px var(--terra);
+    letter-spacing: 0.04em;
   }
+  .cover-sub {
+    font-size: clamp(0.95rem, 2.4vmin, 1.35rem);
+    color: var(--ivory-dim);
+    font-style: italic;
+  }
+  .cover-sub em { color: var(--amber); }
 
-  .stack { display: flex; flex-direction: column; align-items: center; gap: 3.2vmin; }
+  /* ── D2 · El nombre: split anillo | texto ── */
+  .split {
+    position: absolute; inset: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    align-items: center;
+    padding: 6vmin 7vw 12vh;
+    gap: 4vmin;
+  }
+  .split-art { position: relative; height: min(74vh, 80vmin); }
+  .split-art svg { width: 100%; height: 100%; }
+  .split-copy { display: flex; flex-direction: column; align-items: flex-start; gap: 2.6vmin; text-align: left; }
 
-  /* ── Cita bíblica ── */
-  .verse {
+  /* ── D3 · Papiro ── */
+  .papyrus-stage {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 3vmin; padding: 5vmin 6vw 13vh;
+  }
+  .greek-back {
+    position: absolute; top: 49%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--display);
+    font-size: clamp(6rem, 26vw, 24rem);
+    letter-spacing: 0.06em;
+    color: rgba(240, 231, 213, 0.045);
+    white-space: nowrap; pointer-events: none;
+  }
+  .papyrus {
+    position: relative;
+    background:
+      radial-gradient(120% 90% at 30% 20%, rgba(255, 246, 224, 0.1), transparent 60%),
+      linear-gradient(168deg, #D9C69A 0%, #CBB584 34%, #C0A873 62%, #A98F5C 100%);
+    color: #2A2114;
+    padding: clamp(1.4rem, 5vmin, 3.4rem) clamp(1.6rem, 6vmin, 4.2rem);
+    max-width: min(88vw, 62ch);
+    transform: rotate(-1.2deg);
+    border-radius: 3px 14px 5px 12px / 12px 4px 14px 5px;
+    box-shadow:
+      0 2px 0 rgba(255, 240, 200, 0.25) inset,
+      0 -3px 8px rgba(60, 40, 10, 0.35) inset,
+      0 24px 60px -18px rgba(0, 0, 0, 0.75);
+  }
+  .papyrus::before {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    background-image:
+      repeating-linear-gradient(1deg, rgba(96, 70, 32, 0.1) 0 2px, transparent 2px 11px),
+      repeating-linear-gradient(-2deg, rgba(120, 90, 45, 0.07) 0 3px, transparent 3px 17px),
+      radial-gradient(60% 40% at 80% 15%, rgba(110, 80, 35, 0.18), transparent 70%),
+      radial-gradient(50% 35% at 12% 85%, rgba(110, 80, 35, 0.22), transparent 70%),
+      radial-gradient(30% 25% at 60% 60%, rgba(140, 105, 50, 0.12), transparent 70%);
+    mix-blend-mode: multiply;
+    pointer-events: none;
+  }
+  .papyrus-head {
+    font-family: var(--utility);
+    font-size: clamp(0.58rem, 1.5vmin, 0.82rem);
+    letter-spacing: 0.34em;
+    color: #6B4A1E;
+    margin-bottom: 1.4em;
+  }
+  .papyrus-verse {
     font-family: var(--display);
     font-style: italic;
-    font-size: clamp(1.3rem, 4.2vmin, 2.6rem);
+    font-size: clamp(1.1rem, 3.4vmin, 2.1rem);
     line-height: 1.5;
-    max-width: 26em;
     text-wrap: balance;
   }
-  .verse::before { content: '“'; color: var(--gold); }
-  .verse::after  { content: '”'; color: var(--gold); }
-
-  .verse-ref {
+  .papyrus-ref {
+    margin-top: 1.4em;
     font-family: var(--utility);
-    font-size: clamp(0.65rem, 1.7vmin, 0.95rem);
-    letter-spacing: 0.35em;
-    text-transform: uppercase;
+    font-size: clamp(0.58rem, 1.5vmin, 0.82rem);
+    letter-spacing: 0.3em;
+    color: #6B4A1E;
+  }
+  .theme-line {
+    font-size: clamp(1rem, 2.7vmin, 1.5rem);
     color: var(--ivory-dim);
   }
+  .theme-line em { color: var(--terra); font-style: italic; }
 
-  /* ── Diapositiva de los 4 enfoques: cuadrantes de 90° ── */
-  .quad-wrap {
+  /* ── D4 · Odeón ── */
+  .odeon-copy {
+    position: absolute; left: 0; right: 0; top: 12vh;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 2.6vmin; text-align: center; padding: 0 8vw;
+  }
+
+  /* ── D5 · La rueda de enfoques ── */
+  .wheel-layout {
+    position: absolute; inset: 0;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 2.2vmin;
-    width: min(92vw, 118vmin);
-    margin-top: 1.5vmin;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    align-items: center;
+    padding: 5vmin 6vw 12vh;
+    gap: 3vmin;
   }
-
-  .quad {
-    border: 1px solid rgba(237, 230, 214, 0.14);
-    background: linear-gradient(160deg, rgba(237, 230, 214, 0.045), rgba(237, 230, 214, 0.012));
-    padding: clamp(0.9rem, 3.4vmin, 2.2rem) clamp(1rem, 3.6vmin, 2.4rem);
-    text-align: left;
+  .wheel-art { position: relative; height: min(70vh, 76vmin); }
+  .wheel-art svg { width: 100%; height: 100%; }
+  .roles { display: flex; flex-direction: column; gap: 1.6vmin; text-align: left; }
+  .role {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.4em 1.1em;
+    align-items: baseline;
+    padding: clamp(0.55rem, 1.8vmin, 1.05rem) clamp(0.7rem, 2.2vmin, 1.4rem);
+    border-left: 2px solid rgba(240, 231, 213, 0.15);
     opacity: 0;
-    display: flex; flex-direction: column; gap: 1.2vmin;
   }
-  .quad.on { animation: quadIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-  @keyframes quadIn {
-    from { opacity: 0; transform: translateY(3.5vh) scale(0.96); filter: blur(6px); }
+  .role.on { animation: roleIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+  @keyframes roleIn {
+    from { opacity: 0; transform: translateX(3.5vw); filter: blur(5px); }
     to   { opacity: 1; transform: none; filter: blur(0); }
   }
-
-  .quad-deg {
-    font-family: var(--utility);
-    font-size: clamp(0.6rem, 1.5vmin, 0.85rem);
-    letter-spacing: 0.3em;
-    color: var(--gold);
-  }
-  .quad-title {
+  .role.on { border-left-color: var(--terra); }
+  .role-num {
     font-family: var(--display);
-    font-size: clamp(1.15rem, 3.6vmin, 2.1rem);
-    line-height: 1.12;
+    font-size: clamp(1.3rem, 4vmin, 2.4rem);
+    color: var(--terra);
+    line-height: 1;
   }
-  .quad-desc {
-    font-size: clamp(0.8rem, 2vmin, 1.05rem);
-    line-height: 1.55;
+  .role-title {
+    font-family: var(--display);
+    font-size: clamp(1.15rem, 3.4vmin, 2rem);
+    line-height: 1.1;
+  }
+  .role-desc {
+    grid-column: 2;
+    font-size: clamp(0.78rem, 1.9vmin, 1rem);
+    line-height: 1.5;
     color: var(--ivory-dim);
   }
 
-  /* ── HUD: dial de grados + progreso + pista ── */
+  /* ── D6 · Cierre / amanecer ── */
+  .close-block {
+    position: absolute; left: 0; right: 0; top: 14vh;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 2.8vmin; text-align: center; padding: 0 8vw;
+  }
+
+  /* ── HUD ── */
   .hud {
-    position: fixed; z-index: 3;
+    position: fixed; z-index: 5;
     left: 0; right: 0; bottom: 0;
     display: flex; align-items: flex-end; justify-content: space-between;
-    padding: 0 4vmin 3.2vmin;
+    padding: 0 4vmin 3vmin;
     pointer-events: none;
     font-family: var(--utility);
   }
-
-  .dial { display: flex; align-items: center; gap: 1.6vmin; }
-
-  .dial-ring { width: clamp(44px, 8vmin, 72px); height: clamp(44px, 8vmin, 72px); transform: rotate(-90deg); }
-  .dial-ring .track { fill: none; stroke: rgba(237, 230, 214, 0.15); stroke-width: 2; }
+  .dial { display: flex; align-items: center; gap: 1.5vmin; }
+  .dial-ring { width: clamp(42px, 7.5vmin, 68px); height: clamp(42px, 7.5vmin, 68px); transform: rotate(-90deg); }
+  .dial-ring .track { fill: none; stroke: rgba(240, 231, 213, 0.16); stroke-width: 2; }
   .dial-ring .arc {
-    fill: none; stroke: var(--gold); stroke-width: 2;
-    stroke-linecap: round;
-    stroke-dasharray: 289;
-    stroke-dashoffset: 289;
+    fill: none; stroke: var(--gold); stroke-width: 2; stroke-linecap: round;
+    stroke-dasharray: 289; stroke-dashoffset: 289;
     transition: stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1);
   }
-
   .dial-deg {
-    font-size: clamp(0.85rem, 2.4vmin, 1.3rem);
+    font-size: clamp(0.85rem, 2.3vmin, 1.25rem);
     letter-spacing: 0.14em;
-    color: var(--ivory);
     font-variant-numeric: tabular-nums;
     min-width: 4ch;
   }
   .dial-deg small { color: var(--gold); font-size: 0.75em; }
-
   .hint {
-    font-size: clamp(0.58rem, 1.5vmin, 0.8rem);
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: rgba(237, 230, 214, 0.4);
+    font-size: clamp(0.56rem, 1.5vmin, 0.78rem);
+    letter-spacing: 0.3em; text-transform: uppercase;
+    color: rgba(240, 231, 213, 0.45);
     animation: pulse 2.8s ease-in-out infinite;
   }
   @keyframes pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.9; } }
-
   .counter {
-    font-size: clamp(0.62rem, 1.6vmin, 0.85rem);
+    font-size: clamp(0.6rem, 1.6vmin, 0.82rem);
     letter-spacing: 0.3em;
-    color: rgba(237, 230, 214, 0.4);
+    color: rgba(240, 231, 213, 0.45);
     font-variant-numeric: tabular-nums;
   }
 
-  /* ── Accesibilidad ── */
   .nav-btn {
-    position: fixed; z-index: 4; top: 0; bottom: 0; width: 12vw;
+    position: fixed; z-index: 6; top: 0; bottom: 0; width: 12vw;
     background: none; border: none; cursor: pointer; opacity: 0;
   }
   .nav-btn:focus-visible { opacity: 1; outline: 2px solid var(--gold); outline-offset: -6px; }
@@ -286,118 +357,144 @@
     .hint { animation: none; opacity: 0.6; }
   }
 
-  @media (max-width: 640px) {
-    .slide { padding: 5vmin 6vmin 18vmin; }
-    .quad-wrap { grid-template-columns: 1fr; gap: 1.6vmin; }
-    .quad { padding: 0.85rem 1.1rem; gap: 0.35rem; }
-    .quad-desc { display: none; }
+  /* ── Móvil ── */
+  @media (max-width: 760px) {
+    .cover-block { left: 8vw; bottom: 17vh; }
+    .split { grid-template-columns: 1fr; grid-template-rows: minmax(0, 4fr) auto; padding: 4vmin 8vw 14vh; }
+    .split-art { height: 100%; min-height: 0; }
+    .split-copy { align-items: flex-start; }
+    .wheel-layout { grid-template-columns: 1fr; grid-template-rows: minmax(0, 2fr) auto; padding: 3vmin 6vw 13vh; gap: 1.5vmin; }
+    .wheel-art { height: 100%; min-height: 0; }
+    .role-desc { display: none; }
+    .greek-back { font-size: clamp(5rem, 34vw, 10rem); }
   }
 </style>
 </head>
 <body>
 
-<canvas id="dust"></canvas>
-
-<!-- Anillo de compás de fondo: marcas cada 6°, cardinales cada 90° -->
-<svg id="compass" viewBox="0 0 1000 1000" aria-hidden="true"></svg>
+<canvas id="stars"></canvas>
 
 <div class="stage" id="stage">
 
-  <!-- ═══════════════ DIAPOSITIVA 1 · PORTADA ═══════════════
-       (Edita los textos aquí — el título grande usa data-glyphs
-        para animar letra por letra) -->
+  <!-- ═══════════ D1 · PORTADA · Templo de Apolo al atardecer ═══════════ -->
   <section class="slide" data-exit="exit-zoom" data-compass="0">
-    <div class="stack">
-      <p class="eyebrow cue-widen" data-cue="0">Estudio Bíblico · Primera Carta a los Corintios</p>
-      <h1 class="display-xl" data-glyphs data-cue="300">CORINTIOS<br>360</h1>
-      <div class="rule cue-trace" data-cue="1400"></div>
-      <p class="lede cue-rise" data-cue="1600">La carta completa. <em>Todos los ángulos.</em></p>
+    <div class="scene cue-scene" data-cue="0" data-scene="temple-dusk"></div>
+    <div class="content">
+      <div class="cover-block">
+        <p class="eyebrow cue-widen" data-cue="400">Estudio Bíblico · 1ª Carta a los Corintios</p>
+        <div class="cover-title">
+          <h1 class="display-xl" data-glyphs data-cue="700">CORINTIOS</h1>
+          <span class="cover-360 cue-focus" data-cue="1500">360°</span>
+        </div>
+        <div class="rule cue-trace" data-cue="2000"></div>
+        <p class="cover-sub cue-rise" data-cue="2200">La carta completa. <em>Todos los ángulos.</em></p>
+      </div>
     </div>
   </section>
 
-  <!-- ═══════════════ DIAPOSITIVA 2 · EL NOMBRE ═══════════════ -->
+  <!-- ═══════════ D2 · EL NOMBRE · anillo griego ═══════════ -->
   <section class="slide" data-exit="exit-lift" data-compass="60">
-    <div class="stack">
-      <div class="num-giant cue-focus" data-cue="0">360°</div>
-      <h2 class="display-lg cue-wipe" data-cue="400">¿Por qué el nombre?</h2>
-      <p class="lede cue-rise" data-cue="800">
-        Porque no vamos a leer 1&nbsp;Corintios por encima:
-        vamos a rodearla, estudiarla <strong>desde todos los ángulos</strong>
-        hasta obtener una comprensión completa de su mensaje.
-      </p>
-      <p class="lede cue-rise" data-cue="1200">
-        <em>¿Tienes una propuesta mejor?</em> Compártela —
-        el nombre lo elegimos entre todos.
-      </p>
-    </div>
-  </section>
-
-  <!-- ═══════════════ DIAPOSITIVA 3 · ESTA SEMANA ═══════════════ -->
-  <section class="slide" data-exit="exit-blur" data-compass="140">
-    <div class="stack">
-      <p class="eyebrow cue-widen" data-cue="0">Esta semana</p>
-      <h2 class="display-lg cue-focus" data-cue="350">1 Corintios 1:1–9</h2>
-      <div class="rule cue-trace" data-cue="900"></div>
-      <p class="verse cue-rise" data-cue="1100">Gracias doy a mi Dios siempre por vosotros, por la gracia de Dios que os fue dada en Cristo Jesús.</p>
-      <p class="verse-ref cue-rise" data-cue="1500">1 Corintios 1:4</p>
-      <p class="lede cue-rise" data-cue="1800">Tema de la semana: <em>la misericordia.</em></p>
-    </div>
-  </section>
-
-  <!-- ═══════════════ DIAPOSITIVA 4 · LA DINÁMICA ═══════════════ -->
-  <section class="slide" data-exit="exit-fade" data-compass="220">
-    <div class="stack">
-      <p class="eyebrow cue-widen" data-cue="0">Cómo vamos a exponer</p>
-      <h2 class="display-lg cue-wipe" data-cue="350">No es hablar<br>por turnos.</h2>
-      <p class="lede cue-rise" data-cue="900">
-        Cada exposición tendrá <strong>un enfoque diferente</strong>,
-        conectado con las demás — para que el mensaje fluya
-        como una sola presentación: dinámica, participativa y bien hilada.
-      </p>
-    </div>
-  </section>
-
-  <!-- ═══════ DIAPOSITIVA 5 · LOS 4 ENFOQUES (clic revela cada uno) ═══════ -->
-  <section class="slide" data-exit="exit-zoom" data-compass="300">
-    <div class="stack" style="gap: 1.8vmin;">
-      <p class="eyebrow cue-widen" data-cue="0">Cuatro ángulos · un solo mensaje</p>
-      <div class="quad-wrap">
-        <div class="quad frag">
-          <span class="quad-deg">0° — 90°</span>
-          <span class="quad-title">Introducción creativa</span>
-          <span class="quad-desc">Captura la atención desde el primer segundo: una historia, una pregunta, una imagen que abra el tema.</span>
-        </div>
-        <div class="quad frag">
-          <span class="quad-deg">90° — 180°</span>
-          <span class="quad-title">Contexto</span>
-          <span class="quad-desc">Corinto, Pablo y la iglesia: el trasfondo histórico que hace que el pasaje cobre vida.</span>
-        </div>
-        <div class="quad frag">
-          <span class="quad-deg">180° — 270°</span>
-          <span class="quad-title">Desarrollo del tema</span>
-          <span class="quad-desc">El corazón de la exposición: qué dice el texto y qué nos enseña sobre la misericordia.</span>
-        </div>
-        <div class="quad frag">
-          <span class="quad-deg">270° — 360°</span>
-          <span class="quad-title">Aplicación práctica</span>
-          <span class="quad-desc">Del texto a la vida: cómo vivimos esto en la semana, en la casa, en la calle.</span>
+    <div class="scene" data-scene="night"></div>
+    <div class="content">
+      <div class="split">
+        <div class="split-art cue-scene" data-cue="0" data-scene="ring360"></div>
+        <div class="split-copy">
+          <p class="eyebrow cue-widen" data-cue="300">El nombre</p>
+          <h2 class="display-lg cue-wipe" data-cue="600">Rodear la carta<br>hasta entenderla<br>completa.</h2>
+          <p class="lede cue-rise" data-cue="1100">
+            <strong>Corintios 360</strong> porque no vamos a leerla por encima:
+            vamos a estudiarla desde todos los ángulos hasta obtener
+            una comprensión completa de su mensaje.
+          </p>
+          <p class="lede cue-rise" data-cue="1500">
+            <em>¿Tienes una propuesta mejor?</em> Compártela —
+            el nombre lo elegimos entre todos.
+          </p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ═══════════════ DIAPOSITIVA 6 · CIERRE ═══════════════ -->
+  <!-- ═══════════ D3 · ESTA SEMANA · papiro ═══════════ -->
+  <section class="slide" data-exit="exit-blur" data-compass="140">
+    <div class="scene" data-scene="night"></div>
+    <div class="content">
+      <div class="papyrus-stage">
+        <span class="greek-back cue-focus" data-cue="200" aria-hidden="true">ΕΛΕΟΣ</span>
+        <p class="eyebrow cue-widen" data-cue="0">Esta semana</p>
+        <div class="papyrus cue-drop" data-cue="500">
+          <p class="papyrus-head">ΠΡΟΣ ΚΟΡΙΝΘΙΟΥΣ Α · 1 Corintios 1:1–9</p>
+          <p class="papyrus-verse">«Gracias doy a mi Dios siempre por vosotros, por la gracia de Dios que os fue dada en Cristo Jesús.»</p>
+          <p class="papyrus-ref">— 1 Corintios 1:4</p>
+        </div>
+        <p class="theme-line cue-rise" data-cue="1300">Tema de la semana: <em>la misericordia</em> — <span style="letter-spacing:0.12em;">ἔλεος</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ D4 · LA DINÁMICA · odeón ═══════════ -->
+  <section class="slide" data-exit="exit-fade" data-compass="220">
+    <div class="scene cue-scene" data-cue="0" data-scene="odeon"></div>
+    <div class="content">
+      <div class="odeon-copy">
+        <p class="eyebrow cue-widen" data-cue="300">Cómo vamos a exponer</p>
+        <h2 class="display-lg cue-wipe" data-cue="600">No es hablar por turnos.</h2>
+        <p class="lede cue-rise" data-cue="1100" style="max-width: 36em;">
+          Cada exposición tendrá <strong>un enfoque diferente</strong>, conectado
+          con las demás — como un teatro donde cada voz entra en su momento
+          y el mensaje fluye como <em>una sola presentación.</em>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ D5 · LOS 4 ENFOQUES · rueda (clic revela cada uno) ═══ -->
+  <section class="slide" data-exit="exit-zoom" data-compass="300">
+    <div class="scene" data-scene="night"></div>
+    <div class="content">
+      <div class="wheel-layout">
+        <div class="wheel-art cue-scene" data-cue="0" data-scene="wheel"></div>
+        <div class="roles">
+          <p class="eyebrow cue-widen" data-cue="300" style="margin-bottom: 0.8vmin;">Cuatro ángulos · un solo mensaje</p>
+          <div class="role frag" data-arc="0">
+            <span class="role-num">Ⅰ</span>
+            <span class="role-title">Introducción creativa</span>
+            <span class="role-desc">Capturar la atención desde el primer segundo: una historia, una pregunta, una imagen.</span>
+          </div>
+          <div class="role frag" data-arc="1">
+            <span class="role-num">Ⅱ</span>
+            <span class="role-title">Contexto</span>
+            <span class="role-desc">Corinto, Pablo y la iglesia: el trasfondo que hace que el pasaje cobre vida.</span>
+          </div>
+          <div class="role frag" data-arc="2">
+            <span class="role-num">Ⅲ</span>
+            <span class="role-title">Desarrollo del tema</span>
+            <span class="role-desc">El corazón de la exposición: qué dice el texto sobre la misericordia.</span>
+          </div>
+          <div class="role frag" data-arc="3">
+            <span class="role-num">Ⅳ</span>
+            <span class="role-title">Aplicación práctica</span>
+            <span class="role-desc">Del texto a la vida: cómo lo vivimos en la semana, en la casa, en la calle.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ D6 · CIERRE · amanecer + laurel ═══════════ -->
   <section class="slide" data-exit="exit-fade" data-compass="360">
-    <div class="stack">
-      <p class="eyebrow cue-widen" data-cue="0">El círculo se completa</p>
-      <h2 class="display-lg cue-focus" data-cue="350">Tus ideas son<br>bienvenidas.</h2>
-      <div class="rule cue-trace" data-cue="1000"></div>
-      <p class="lede cue-rise" data-cue="1200">
-        En un momento comparto la propuesta de organización con más detalles.
-        Mientras tanto: sugerencias para mejorar la dinámica,
-        <strong>más que bienvenidas.</strong>
-      </p>
-      <p class="eyebrow cue-rise" data-cue="1700" style="color: var(--ivory-dim);">Corintios 360</p>
+    <div class="scene cue-scene" data-cue="0" data-scene="temple-dawn"></div>
+    <div class="content">
+      <div class="close-block">
+        <div class="cue-focus" data-cue="300" data-scene="seal" style="width: clamp(90px, 16vmin, 150px); height: clamp(90px, 16vmin, 150px);"></div>
+        <h2 class="display-lg cue-wipe" data-cue="600">Tus ideas son bienvenidas.</h2>
+        <p class="lede cue-rise" data-cue="1200" style="max-width: 34em;">
+          En un momento comparto la propuesta de organización con más detalles.
+          Mientras tanto: sugerencias para mejorar la dinámica,
+          <strong>más que bienvenidas.</strong>
+        </p>
+        <p class="eyebrow cue-rise" data-cue="1700" style="color: var(--ivory-dim); text-shadow: 0 1px 10px rgba(8, 11, 18, 0.9);">Corintios 360 · el círculo se completa</p>
+      </div>
     </div>
   </section>
 
@@ -423,38 +520,387 @@
 (function () {
   'use strict';
 
+  var NS = 'http://www.w3.org/2000/svg';
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function svgEl(tag, attrs) {
+    var el = document.createElementNS(NS, tag);
+    for (var k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     ESCENAS ILUSTRADAS (generadas por código)
+     ════════════════════════════════════════════════════════════ */
+
+  /* Cielo por franjas — dusk (atardecer), night, dawn (amanecer) */
+  var SKIES = {
+    dusk:  [['0%', '#0D1322'], ['32%', '#242441'], ['54%', '#54303C'], ['72%', '#8C4A33'], ['86%', '#C97B3C']],
+    night: [['0%', '#080C15'], ['55%', '#0E1420'], ['100%', '#141B2C']],
+    dawn:  [['0%', '#0E1626'], ['45%', '#22354A'], ['70%', '#57584E'], ['88%', '#B98A4C'], ['100%', '#E0B268']]
+  };
+
+  var gradSeq = 0;
+  function skyRect(svg, kind, W, H) {
+    var id = 'sky' + (gradSeq++);
+    var defs = svgEl('defs', {});
+    var g = svgEl('linearGradient', { id: id, x1: 0, y1: 0, x2: 0, y2: 1 });
+    SKIES[kind].forEach(function (s) {
+      g.appendChild(svgEl('stop', { offset: s[0], 'stop-color': s[1] }));
+    });
+    defs.appendChild(g);
+    svg.appendChild(defs);
+    svg.appendChild(svgEl('rect', { x: 0, y: 0, width: W, height: H, fill: 'url(#' + id + ')' }));
+    return defs;
+  }
+
+  /* Columnas dóricas del Templo de Apolo (7 en pie, monolíticas) */
+  function drawTemple(svg, W, H, opts) {
+    var ground = H * opts.groundY;
+    var g = svgEl('g', { fill: opts.color });
+
+    // Acrocorinto al fondo
+    var m = 'M' + (-20) + ' ' + ground;
+    [[0.06, 0.86], [0.16, 0.72], [0.24, 0.78], [0.34, 0.62], [0.46, 0.7], [0.58, 0.58],
+     [0.72, 0.7], [0.84, 0.64], [0.95, 0.76], [1.05, 0.7]].forEach(function (p) {
+      m += ' L' + (p[0] * W) + ' ' + (p[1] * ground);
+    });
+    m += ' L' + (W + 20) + ' ' + ground + ' Z';
+    svg.appendChild(svgEl('path', { d: m, fill: opts.mountain, opacity: 0.9 }));
+
+    // estilóbato (plataforma de 3 gradas)
+    var pw = W * 0.72, px = (W - pw) / 2;
+    for (var s = 0; s < 3; s++) {
+      var stepH = H * 0.016;
+      var inset = s * W * 0.012;
+      g.appendChild(svgEl('rect', {
+        x: px + inset, y: ground - stepH * (3 - s),
+        width: pw - inset * 2, height: stepH + 1
+      }));
+    }
+    var baseY = ground - H * 0.048;
+
+    // 7 columnas — la 3ª y la 6ª quebradas (ruina)
+    var n = 7;
+    var colH = H * opts.colH;
+    var span = pw * 0.86;
+    var x0 = px + (pw - span) / 2;
+    var archStart = null, archEnd = null;
+    for (var i = 0; i < n; i++) {
+      var cx = x0 + (span / (n - 1)) * i;
+      var h = colH;
+      var broken = (i === 2);
+      if (broken) h = colH * 0.55;
+      var wB = W * 0.022, wT = W * 0.017; // éntasis: más ancha abajo
+      var top = baseY - h;
+      // fuste
+      g.appendChild(svgEl('path', {
+        d: 'M' + (cx - wB) + ' ' + baseY +
+           ' L' + (cx - wT) + ' ' + top +
+           ' L' + (cx + wT) + ' ' + top +
+           ' L' + (cx + wB) + ' ' + baseY + ' Z'
+      }));
+      if (broken) {
+        // borde quebrado
+        var jag = 'M' + (cx - wT) + ' ' + top;
+        jag += ' l' + wT * 0.5 + ' ' + (-H * 0.012);
+        jag += ' l' + wT * 0.5 + ' ' + (H * 0.008);
+        jag += ' l' + wT * 0.5 + ' ' + (-H * 0.009);
+        jag += ' l' + wT * 0.5 + ' ' + (H * 0.013);
+        jag += ' L' + (cx + wT) + ' ' + (top + 2) + ' L' + (cx - wT) + ' ' + (top + 2) + ' Z';
+        g.appendChild(svgEl('path', { d: jag }));
+      } else {
+        // capitel: equino + ábaco
+        g.appendChild(svgEl('rect', { x: cx - wT * 1.5, y: top - H * 0.016, width: wT * 3, height: H * 0.016 }));
+        g.appendChild(svgEl('rect', { x: cx - wT * 1.9, y: top - H * 0.03, width: wT * 3.8, height: H * 0.015 }));
+        if (archStart === null) archStart = { x: cx - wT * 1.9, i: i };
+        archEnd = { x: cx + wT * 1.9, i: i };
+      }
+    }
+    // arquitrabe parcial sobre las columnas 4-7 (ruina asimétrica)
+    var archY = baseY - colH - H * 0.03;
+    var aX = x0 + (span / (n - 1)) * 3 - W * 0.033;
+    g.appendChild(svgEl('rect', { x: aX, y: archY - H * 0.026, width: (x0 + span + W * 0.033) - aX, height: H * 0.027 }));
+
+    svg.appendChild(g);
+    return { ground: ground };
+  }
+
+  function sunDisc(svg, W, H, cx, cy, r, core, glow) {
+    var id = 'sun' + (gradSeq++);
+    var defs = svgEl('defs', {});
+    var g = svgEl('radialGradient', { id: id });
+    g.appendChild(svgEl('stop', { offset: '0%', 'stop-color': core, 'stop-opacity': 0.95 }));
+    g.appendChild(svgEl('stop', { offset: '35%', 'stop-color': core, 'stop-opacity': 0.5 }));
+    g.appendChild(svgEl('stop', { offset: '100%', 'stop-color': glow, 'stop-opacity': 0 }));
+    defs.appendChild(g);
+    svg.appendChild(defs);
+    svg.appendChild(svgEl('circle', { cx: cx, cy: cy, r: r * 3.2, fill: 'url(#' + id + ')' }));
+    svg.appendChild(svgEl('circle', { cx: cx, cy: cy, r: r, fill: core, opacity: 0.9 }));
+  }
+
+  var SCENES = {
+
+    'temple-dusk': function (svg, W, H) {
+      skyRect(svg, 'dusk', W, H);
+      sunDisc(svg, W, H, W * 0.58, H * 0.56, W * 0.05, '#F2C078', '#C97B3C');
+      drawTemple(svg, W, H, { groundY: 0.86, colH: 0.34, color: '#0A0D14', mountain: 'rgba(26,22,38,0.82)' });
+      // suelo
+      svg.appendChild(svgEl('rect', { x: 0, y: H * 0.86, width: W, height: H * 0.14, fill: '#07090F' }));
+      // scrim para legibilidad del título
+      var id = 'scrim' + (gradSeq++);
+      var defs = svgEl('defs', {});
+      var g = svgEl('linearGradient', { id: id, x1: 0, y1: 1, x2: 0.6, y2: 0 });
+      g.appendChild(svgEl('stop', { offset: '0%', 'stop-color': '#07090F', 'stop-opacity': 0.85 }));
+      g.appendChild(svgEl('stop', { offset: '55%', 'stop-color': '#07090F', 'stop-opacity': 0.25 }));
+      g.appendChild(svgEl('stop', { offset: '100%', 'stop-color': '#07090F', 'stop-opacity': 0 }));
+      defs.appendChild(g);
+      svg.appendChild(defs);
+      svg.appendChild(svgEl('rect', { x: 0, y: 0, width: W, height: H, fill: 'url(#' + id + ')' }));
+    },
+
+    'temple-dawn': function (svg, W, H) {
+      skyRect(svg, 'dawn', W, H);
+      sunDisc(svg, W, H, W * 0.5, H * 0.82, W * 0.05, '#F5D9A0', '#E0B268');
+      drawTemple(svg, W, H, { groundY: 0.9, colH: 0.22, color: '#0C0F18', mountain: 'rgba(28,34,48,0.85)' });
+      svg.appendChild(svgEl('rect', { x: 0, y: H * 0.9, width: W, height: H * 0.1, fill: '#080B12' }));
+      var id = 'scrim' + (gradSeq++);
+      var defs = svgEl('defs', {});
+      var g = svgEl('linearGradient', { id: id, x1: 0, y1: 0, x2: 0, y2: 1 });
+      g.appendChild(svgEl('stop', { offset: '0%', 'stop-color': '#080B12', 'stop-opacity': 0.8 }));
+      g.appendChild(svgEl('stop', { offset: '50%', 'stop-color': '#080B12', 'stop-opacity': 0.15 }));
+      g.appendChild(svgEl('stop', { offset: '100%', 'stop-color': '#080B12', 'stop-opacity': 0 }));
+      defs.appendChild(g);
+      svg.appendChild(defs);
+      svg.appendChild(svgEl('rect', { x: 0, y: 0, width: W, height: H * 0.6, fill: 'url(#' + id + ')' }));
+    },
+
+    'night': function (svg, W, H) {
+      skyRect(svg, 'night', W, H);
+    },
+
+    /* Anillo 360 con letras griegas orbitando */
+    'ring360': function (svg, W, H) {
+      var S = Math.min(W, H), cx = W / 2, cy = H / 2;
+      var r1 = S * 0.44, r2 = S * 0.36, r3 = S * 0.27;
+      // marcas de grados
+      var ticks = svgEl('g', {});
+      for (var d = 0; d < 360; d += 5) {
+        var big = d % 45 === 0;
+        var a = d * Math.PI / 180;
+        var len = big ? S * 0.03 : S * 0.012;
+        ticks.appendChild(svgEl('line', {
+          x1: cx + Math.cos(a) * (r1 - len), y1: cy + Math.sin(a) * (r1 - len),
+          x2: cx + Math.cos(a) * r1, y2: cy + Math.sin(a) * r1,
+          stroke: big ? '#CE7B52' : 'rgba(240,231,213,0.3)',
+          'stroke-width': big ? 2 : 1
+        }));
+      }
+      svg.appendChild(ticks);
+      svg.appendChild(svgEl('circle', { cx: cx, cy: cy, r: r2, fill: 'none', stroke: 'rgba(240,231,213,0.2)', 'stroke-width': 1 }));
+      // texto griego circular
+      var defs = svgEl('defs', {});
+      var pid = 'circ' + (gradSeq++);
+      defs.appendChild(svgEl('path', {
+        id: pid,
+        d: 'M ' + (cx - r3) + ' ' + cy + ' a ' + r3 + ' ' + r3 + ' 0 1 1 ' + (r3 * 2) + ' 0 a ' + r3 + ' ' + r3 + ' 0 1 1 ' + (-r3 * 2) + ' 0'
+      }));
+      svg.appendChild(defs);
+      var t = svgEl('text', {
+        fill: 'rgba(240,231,213,0.5)',
+        'font-family': 'Georgia, serif',
+        'font-size': S * 0.052,
+        'letter-spacing': S * 0.02
+      });
+      var tp = svgEl('textPath', { 'text-length': '100%' });
+      tp.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#' + pid);
+      tp.setAttribute('href', '#' + pid);
+      tp.textContent = 'ΠΡΟΣ ΚΟΡΙΝΘΙΟΥΣ · ΠΡΟΣ ΚΟΡΙΝΘΙΟΥΣ · ';
+      t.appendChild(tp);
+      var spin = svgEl('g', {});
+      spin.appendChild(t);
+      svg.appendChild(spin);
+      if (!reduced) {
+        var anim = svgEl('animateTransform', {
+          attributeName: 'transform', type: 'rotate',
+          from: '0 ' + cx + ' ' + cy, to: '360 ' + cx + ' ' + cy,
+          dur: '90s', repeatCount: 'indefinite'
+        });
+        spin.appendChild(anim);
+      }
+      // centro: 360°
+      var c = svgEl('text', {
+        x: cx, y: cy + S * 0.05,
+        'text-anchor': 'middle',
+        fill: '#F0E7D5',
+        'font-family': 'Didot, "Bodoni MT", Georgia, serif',
+        'font-size': S * 0.16
+      });
+      c.textContent = '360°';
+      svg.appendChild(c);
+      var c2 = svgEl('text', {
+        x: cx, y: cy + S * 0.12,
+        'text-anchor': 'middle',
+        fill: '#CE7B52',
+        'font-family': 'Georgia, serif',
+        'font-style': 'italic',
+        'font-size': S * 0.035
+      });
+      c2.textContent = 'una vuelta completa a la carta';
+      svg.appendChild(c2);
+    },
+
+    /* Odeón: gradas concéntricas vistas en planta, ancladas abajo */
+    'odeon': function (svg, W, H) {
+      skyRect(svg, 'night', W, H);
+      var cx = W / 2, cy = H * 1.06;
+      var maxR = Math.max(W, H) * 0.78;
+      var g = svgEl('g', { fill: 'none' });
+      for (var i = 0; i < 11; i++) {
+        var r = maxR * (0.3 + i * 0.07);
+        var op = 0.34 - i * 0.024;
+        g.appendChild(svgEl('circle', {
+          cx: cx, cy: cy, r: r,
+          stroke: i % 4 === 2 ? 'rgba(206,123,82,' + Math.max(op + 0.08, 0.1) + ')' : 'rgba(240,231,213,' + Math.max(op, 0.05) + ')',
+          'stroke-width': i % 4 === 2 ? 2 : 1
+        }));
+      }
+      // pasillos radiales
+      for (var a = -150; a <= -30; a += 24) {
+        var rad = a * Math.PI / 180;
+        g.appendChild(svgEl('line', {
+          x1: cx + Math.cos(rad) * maxR * 0.3, y1: cy + Math.sin(rad) * maxR * 0.3,
+          x2: cx + Math.cos(rad) * maxR, y2: cy + Math.sin(rad) * maxR,
+          stroke: 'rgba(240,231,213,0.1)', 'stroke-width': 1
+        }));
+      }
+      // orquesta central
+      g.appendChild(svgEl('circle', { cx: cx, cy: cy, r: maxR * 0.24, stroke: 'rgba(206,123,82,0.5)', 'stroke-width': 2 }));
+      svg.appendChild(g);
+    },
+
+    /* Rueda de 4 cuadrantes (D5) — los arcos se encienden por fragmento */
+    'wheel': function (svg, W, H) {
+      var S = Math.min(W, H), cx = W / 2, cy = H / 2;
+      var r = S * 0.38;
+      svg.appendChild(svgEl('circle', { cx: cx, cy: cy, r: r + S * 0.05, fill: 'none', stroke: 'rgba(240,231,213,0.14)', 'stroke-width': 1 }));
+      var C = 2 * Math.PI * r;
+      var quarter = C / 4;
+      var labels = ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ'];
+      for (var q = 0; q < 4; q++) {
+        var arc = svgEl('circle', {
+          cx: cx, cy: cy, r: r,
+          fill: 'none',
+          stroke: '#CE7B52', 'stroke-width': S * 0.02, 'stroke-linecap': 'butt',
+          'stroke-dasharray': (quarter - S * 0.02) + ' ' + (C - quarter + S * 0.02),
+          'stroke-dashoffset': -(q * quarter) + C * 0.25,
+          opacity: 0.14,
+          'class': 'wheel-arc', 'data-q': q
+        });
+        arc.style.transition = 'opacity 0.6s ease';
+        svg.appendChild(arc);
+        var mid = (-90 + 45 + q * 90) * Math.PI / 180;
+        var lt = svgEl('text', {
+          x: cx + Math.cos(mid) * (r + S * 0.11),
+          y: cy + Math.sin(mid) * (r + S * 0.11) + S * 0.02,
+          'text-anchor': 'middle',
+          fill: '#F0E7D5', opacity: 0.35,
+          'font-family': 'Didot, Georgia, serif',
+          'font-size': S * 0.055,
+          'class': 'wheel-label', 'data-q': q
+        });
+        lt.style.transition = 'opacity 0.6s ease';
+        lt.textContent = labels[q];
+        svg.appendChild(lt);
+      }
+      // cruz central
+      svg.appendChild(svgEl('line', { x1: cx - r, y1: cy, x2: cx + r, y2: cy, stroke: 'rgba(240,231,213,0.12)', 'stroke-width': 1 }));
+      svg.appendChild(svgEl('line', { x1: cx, y1: cy - r, x2: cx, y2: cy + r, stroke: 'rgba(240,231,213,0.12)', 'stroke-width': 1 }));
+      var c = svgEl('text', {
+        x: cx, y: cy + S * 0.022, 'text-anchor': 'middle',
+        fill: '#F0E7D5', 'font-family': 'Georgia, serif', 'font-style': 'italic',
+        'font-size': S * 0.045
+      });
+      c.textContent = '1 Cor 1:1–9';
+      svg.appendChild(c);
+    },
+
+    /* Sello: el círculo que se completa — anillo fino con marca de 360° */
+    'seal': function (svg, W, H) {
+      var S = Math.min(W, H), cx = W / 2, cy = H / 2;
+      var r = S * 0.4;
+      svg.appendChild(svgEl('circle', {
+        cx: cx, cy: cy, r: r,
+        fill: 'none', stroke: '#CE7B52', 'stroke-width': 2, opacity: 0.85
+      }));
+      svg.appendChild(svgEl('circle', {
+        cx: cx, cy: cy, r: r * 0.82,
+        fill: 'none', stroke: 'rgba(240,231,213,0.25)', 'stroke-width': 1
+      }));
+      // marcas cardinales
+      [0, 90, 180, 270].forEach(function (d) {
+        var a = (d - 90) * Math.PI / 180;
+        svg.appendChild(svgEl('line', {
+          x1: cx + Math.cos(a) * r * 0.88, y1: cy + Math.sin(a) * r * 0.88,
+          x2: cx + Math.cos(a) * r * 0.96, y2: cy + Math.sin(a) * r * 0.96,
+          stroke: '#CE7B52', 'stroke-width': 2
+        }));
+      });
+      // punto que cierra el círculo, arriba
+      svg.appendChild(svgEl('circle', { cx: cx, cy: cy - r, r: S * 0.028, fill: '#E0B268' }));
+      var t = svgEl('text', {
+        x: cx, y: cy + S * 0.05,
+        'text-anchor': 'middle',
+        fill: '#F0E7D5',
+        'font-family': 'Didot, "Bodoni MT", Georgia, serif',
+        'font-size': S * 0.15
+      });
+      t.textContent = '360°';
+      svg.appendChild(t);
+    }
+  };
+
+  /* Montar todas las escenas */
+  function mountScene(container) {
+    var kind = container.getAttribute('data-scene');
+    if (!kind || !SCENES[kind]) return;
+    var W = 1600, H = 900;
+    var svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMidYMid slice' });
+    if (kind === 'ring360' || kind === 'wheel' || kind === 'seal') {
+      svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      W = 900; H = 900;
+      svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    }
+    SCENES[kind](svg, W, H);
+    container.appendChild(svg);
+  }
+  document.querySelectorAll('[data-scene]').forEach(mountScene);
+
+  /* ════════════════════════════════════════════════════════════
+     NAVEGACIÓN
+     ════════════════════════════════════════════════════════════ */
   var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
-  var compass = document.getElementById('compass');
   var dialArc = document.getElementById('dialArc');
   var degNum = document.getElementById('degNum');
   var hint = document.getElementById('hint');
-  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var current = 0;
-  var locked = false;
-  var shownDeg = 0;
-  var degTween = null;
+  var current = 0, locked = false, shownDeg = 0, degTween = null;
 
   document.getElementById('slideTotal').textContent = slides.length;
 
-  /* ── Título en glifos: envuelve cada letra para animarla ── */
+  /* Título en glifos */
   slides.forEach(function (slide) {
     var el = slide.querySelector('[data-glyphs]');
     if (!el) return;
     var base = parseInt(el.getAttribute('data-cue') || '0', 10);
-    var out = '';
-    var i = 0;
-    el.innerHTML.split(/(<br\s*\/?>)/i).forEach(function (chunk) {
-      if (/^<br/i.test(chunk)) { out += '<br>'; return; }
-      chunk.split('').forEach(function (ch) {
-        if (ch === ' ') { out += ' '; return; }
-        out += '<span class="glyph" style="animation-delay:' + (base + i * 70) + 'ms">' + ch + '</span>';
-        i++;
-      });
+    var out = '', i = 0;
+    el.textContent.split('').forEach(function (ch) {
+      if (ch === ' ') { out += ' '; return; }
+      out += '<span class="glyph" style="animation-delay:' + (base + i * 65) + 'ms">' + ch + '</span>';
+      i++;
     });
     el.innerHTML = out;
   });
 
-  /* ── Retrasos de coreografía ── */
   slides.forEach(function (slide) {
     slide.querySelectorAll('[data-cue]').forEach(function (el) {
       if (el.hasAttribute('data-glyphs')) return;
@@ -462,35 +908,6 @@
     });
   });
 
-  /* ── Anillo de compás de fondo ── */
-  (function buildCompass() {
-    var NS = 'http://www.w3.org/2000/svg';
-    var cx = 500, cy = 500, r = 470;
-    var g = document.createElementNS(NS, 'g');
-    for (var d = 0; d < 360; d += 6) {
-      var big = d % 90 === 0;
-      var mid = !big && d % 30 === 0;
-      var len = big ? 34 : (mid ? 20 : 9);
-      var a = d * Math.PI / 180;
-      var line = document.createElementNS(NS, 'line');
-      line.setAttribute('x1', cx + Math.cos(a) * (r - len));
-      line.setAttribute('y1', cy + Math.sin(a) * (r - len));
-      line.setAttribute('x2', cx + Math.cos(a) * r);
-      line.setAttribute('y2', cy + Math.sin(a) * r);
-      line.setAttribute('stroke', big ? '#C9A227' : 'rgba(237,230,214,0.28)');
-      line.setAttribute('stroke-width', big ? 2.5 : 1);
-      g.appendChild(line);
-    }
-    var ring = document.createElementNS(NS, 'circle');
-    ring.setAttribute('cx', cx); ring.setAttribute('cy', cy); ring.setAttribute('r', r - 44);
-    ring.setAttribute('fill', 'none');
-    ring.setAttribute('stroke', 'rgba(237,230,214,0.09)');
-    ring.setAttribute('stroke-width', 1);
-    compass.appendChild(g);
-    compass.appendChild(ring);
-  })();
-
-  /* ── Dial de grados (HUD) ── */
   function setDegrees(target) {
     var C = 2 * Math.PI * 46;
     dialArc.style.strokeDashoffset = C * (1 - target / 360);
@@ -508,34 +925,38 @@
     degTween = requestAnimationFrame(step);
   }
 
-  /* ── Fragmentos (elementos .frag que se revelan clic a clic) ── */
+  /* Fragmentos: además de revelar el rol, enciende su arco en la rueda */
+  function litArc(slide, q, on) {
+    slide.querySelectorAll('.wheel-arc[data-q="' + q + '"], .wheel-label[data-q="' + q + '"]').forEach(function (el) {
+      el.setAttribute('opacity', on ? (el.classList.contains('wheel-arc') ? 0.9 : 0.95) : (el.classList.contains('wheel-arc') ? 0.14 : 0.35));
+      el.style.opacity = '';
+    });
+  }
   function nextFragment(slide) {
     var frag = slide.querySelector('.frag:not(.on)');
     if (!frag) return false;
     frag.classList.add('on');
+    if (frag.hasAttribute('data-arc')) litArc(slide, frag.getAttribute('data-arc'), true);
     return true;
   }
   function resetFragments(slide) {
-    slide.querySelectorAll('.frag.on').forEach(function (f) { f.classList.remove('on'); });
+    slide.querySelectorAll('.frag.on').forEach(function (f) {
+      f.classList.remove('on');
+      if (f.hasAttribute('data-arc')) litArc(slide, f.getAttribute('data-arc'), false);
+    });
   }
 
-  /* ── Navegación ── */
-  function show(idx, dir) {
+  function show(idx) {
     if (locked || idx < 0 || idx >= slides.length || idx === current) return;
     locked = true;
-    var out = slides[current];
-    var inn = slides[idx];
+    var out = slides[current], inn = slides[idx];
     current = idx;
-
     document.getElementById('slideNow').textContent = idx + 1;
     setDegrees(parseInt(inn.getAttribute('data-compass'), 10));
-    compass.style.transform = 'translate(-50%, -50%) rotate(' + (idx * 22) + 'deg)';
     if (hint) hint.style.display = 'none';
-
     resetFragments(inn);
     out.classList.remove('active');
     out.classList.add('leaving', out.getAttribute('data-exit'));
-
     var wait = reduced ? 30 : 620;
     setTimeout(function () {
       out.classList.remove('leaving', out.getAttribute('data-exit'));
@@ -547,32 +968,22 @@
   function advance() {
     if (locked) return;
     if (nextFragment(slides[current])) return;
-    show(current + 1, 1);
+    show(current + 1);
   }
-  function retreat() {
-    if (locked) return;
-    show(current - 1, -1);
-  }
+  function retreat() { if (!locked) show(current - 1); }
 
-  /* Entrada: clic / teclado / swipe */
   document.body.addEventListener('click', function (e) {
     if (e.target.id === 'navPrev') return;
     advance();
   });
-  document.getElementById('navPrev').addEventListener('click', function (e) {
-    e.stopPropagation(); retreat();
-  });
-  document.getElementById('navNext').addEventListener('click', function (e) {
-    e.stopPropagation(); advance();
-  });
+  document.getElementById('navPrev').addEventListener('click', function (e) { e.stopPropagation(); retreat(); });
+  document.getElementById('navNext').addEventListener('click', function (e) { e.stopPropagation(); advance(); });
 
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter' || e.key === 'PageDown') {
-      e.preventDefault(); advance();
-    } else if (e.key === 'ArrowLeft' || e.key === 'Backspace' || e.key === 'PageUp') {
-      e.preventDefault(); retreat();
-    } else if (e.key === 'Home') { show(0, -1); }
-    else if (e.key === 'End') { show(slides.length - 1, 1); }
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter' || e.key === 'PageDown') { e.preventDefault(); advance(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'Backspace' || e.key === 'PageUp') { e.preventDefault(); retreat(); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
   });
 
   var touchX = null;
@@ -581,55 +992,39 @@
     if (touchX === null) return;
     var dx = e.changedTouches[0].clientX - touchX;
     touchX = null;
-    if (dx < -50) advance();
-    else if (dx > 50) retreat();
+    if (dx < -50) advance(); else if (dx > 50) retreat();
   }, { passive: true });
 
-  /* ── Polvo dorado ── */
-  (function dust() {
-    var cv = document.getElementById('dust');
+  /* ── Estrellas + polvo (canvas de fondo global) ── */
+  (function stars() {
+    var cv = document.getElementById('stars');
     var ctx = cv.getContext('2d');
-    var parts = [];
-    var W, H;
-
+    var parts = [], W, H;
     function size() {
       W = cv.width = window.innerWidth * devicePixelRatio;
       H = cv.height = window.innerHeight * devicePixelRatio;
     }
     size();
     window.addEventListener('resize', size);
-
-    var N = reduced ? 0 : Math.min(90, Math.floor(window.innerWidth / 14));
+    var N = reduced ? 0 : Math.min(110, Math.floor(window.innerWidth / 12));
     for (var i = 0; i < N; i++) {
       parts.push({
-        x: Math.random() * 2 - 1, y: Math.random() * 2 - 1,
-        r: (Math.random() * 1.6 + 0.4) * devicePixelRatio,
-        vx: (Math.random() - 0.5) * 0.00022,
-        vy: -(Math.random() * 0.00035 + 0.00008),
-        a: Math.random() * 0.5 + 0.1,
+        x: Math.random(), y: Math.random() * 0.75,
+        r: (Math.random() * 1.2 + 0.3) * devicePixelRatio,
+        a: Math.random() * 0.55 + 0.1,
         tw: Math.random() * Math.PI * 2,
-        ts: Math.random() * 0.012 + 0.004
+        ts: Math.random() * 0.014 + 0.003
       });
     }
-
     function frame() {
       ctx.clearRect(0, 0, W, H);
-      var grd = ctx.createRadialGradient(W / 2, H * 0.42, 0, W / 2, H * 0.42, Math.max(W, H) * 0.7);
-      grd.addColorStop(0, 'rgba(46,110,142,0.10)');
-      grd.addColorStop(0.5, 'rgba(17,21,30,0)');
-      ctx.fillStyle = grd;
-      ctx.fillRect(0, 0, W, H);
-
       for (var i = 0; i < parts.length; i++) {
         var p = parts[i];
-        p.x += p.vx; p.y += p.vy; p.tw += p.ts;
-        if (p.y < -1.05) { p.y = 1.05; p.x = Math.random() * 2 - 1; }
-        if (p.x < -1.05) p.x = 1.05;
-        if (p.x > 1.05) p.x = -1.05;
-        var alpha = p.a * (0.55 + 0.45 * Math.sin(p.tw));
+        p.tw += p.ts;
+        var alpha = p.a * (0.5 + 0.5 * Math.sin(p.tw));
         ctx.beginPath();
-        ctx.arc((p.x * 0.5 + 0.5) * W, (p.y * 0.5 + 0.5) * H, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(201,162,39,' + alpha.toFixed(3) + ')';
+        ctx.arc(p.x * W, p.y * H, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(240,231,213,' + alpha.toFixed(3) + ')';
         ctx.fill();
       }
       if (N > 0) requestAnimationFrame(frame);
@@ -637,7 +1032,6 @@
     frame();
   })();
 
-  /* ── Arranque ── */
   setDegrees(0);
   slides[0].classList.add('active');
 })();
