@@ -34,7 +34,10 @@ export function AuthProvider({ children }) {
   }, [])
 
   useEffect(() => {
-    applyTheme(localStorage.getItem('gs-theme'))
+    // Solo se toca el tema si el usuario eligio uno; si no, se respeta
+    // la preferencia del sistema (o la del visor que muestre la app).
+    const storedTheme = localStorage.getItem('gs-theme')
+    if (storedTheme) applyTheme(storedTheme)
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session ?? null)
       loadProfile(data.session?.user?.id)
