@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase, isDemo } from '../lib/supabase'
+import { resetDemo } from '../lib/demo/client'
+import { seedCurrentUserHistory } from '../lib/demo/db'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../components/common/Toast'
 import { GOALS, monthStr, prevMonthStr } from '../lib/utils'
@@ -162,8 +164,40 @@ export default function ProfilePage() {
         <p className="tiny mt">El botón de medallas es un respaldo manual: normalmente pg_cron las otorga el día 1 a las 6:00 AM.</p>
       </div>
 
+      {isDemo && (
+        <div className="card" style={{ background: 'var(--accent-soft)', border: 'none' }}>
+          <h3>Modo demo</h3>
+          <p className="muted mt" style={{ fontSize: 13.5, marginTop: 6 }}>
+            Los datos viven solo en este dispositivo. Al conectar Supabase, la app pasa a la base real
+            y todo se sincroniza entre tú y tu squad.
+          </p>
+          <button
+            className="btn secondary mt"
+            onClick={() => {
+              seedCurrentUserHistory(user.id)
+              toast('Historial de prueba creado. Mira Progreso y el ranking.')
+              setTimeout(() => location.reload(), 900)
+            }}
+          >
+            Rellenar mi historial de prueba
+          </button>
+          <p className="tiny mt">Crea 6 semanas de entrenos y carreras tuyos para ver las gráficas llenas.</p>
+          <button
+            className="btn secondary mt"
+            onClick={() => {
+              if (confirm('¿Reiniciar la demo? Se borran tus datos de prueba y vuelve el squad original.')) {
+                resetDemo()
+                location.reload()
+              }
+            }}
+          >
+            Reiniciar datos de la demo
+          </button>
+        </div>
+      )}
+
       <button className="btn danger" onClick={logout}>Cerrar sesión</button>
-      <p className="tiny center mt">Gym Squad v1.0</p>
+      <p className="tiny center mt">Gym Squad v1.0{isDemo ? ' · demo local' : ''}</p>
     </div>
   )
 }

@@ -69,7 +69,8 @@ export function prevMonthStr(m = monthStr()) {
 
 export function monthLabel(m) {
   const [y, mo] = m.split('-').map(Number)
-  return new Date(y, mo - 1, 1).toLocaleDateString('es-DO', { month: 'long', year: 'numeric' })
+  const label = new Date(y, mo - 1, 1).toLocaleDateString('es-DO', { month: 'long', year: 'numeric' })
+  return label.charAt(0).toUpperCase() + label.slice(1)
 }
 
 export function weekRange(d = new Date()) {

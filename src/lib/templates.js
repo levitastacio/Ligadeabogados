@@ -8,32 +8,32 @@ export const ROUTINE_TEMPLATES = {
     {
       name: 'Push Pull Legs (6 días)',
       days: [
-        { name: 'Push A', emoji: '🔵', color: '#0A84FF', muscles: ['pecho', 'hombro', 'triceps'], exercises: [
+        { name: 'Push A', emoji: '💪', color: '#0A84FF', muscles: ['pecho', 'hombro', 'triceps'], exercises: [
           ['Press banca con barra', T(4, '8-12', 90)], ['Press inclinado con mancuernas', T(3, '8-12', 90)],
           ['Press de hombros con mancuernas', T(3, '8-12', 90)], ['Elevaciones laterales', T(3, '12-15', 60)],
           ['Extensión de tríceps en polea', T(3, '10-12', 60)],
         ] },
-        { name: 'Pull A', emoji: '🟢', color: '#30D158', muscles: ['espalda', 'biceps'], exercises: [
+        { name: 'Pull A', emoji: '🎯', color: '#30D158', muscles: ['espalda', 'biceps'], exercises: [
           ['Dominadas', T(4, '6-10', 90)], ['Remo con barra', T(3, '8-12', 90)],
           ['Remo en polea baja', T(3, '10-12', 90)], ['Face pull', T(3, '12-15', 60)],
           ['Curl con barra', T(3, '8-12', 60)],
         ] },
-        { name: 'Legs A', emoji: '🟠', color: '#FF9F0A', muscles: ['pierna'], exercises: [
+        { name: 'Legs A', emoji: '🦵', color: '#FF9F0A', muscles: ['pierna'], exercises: [
           ['Sentadilla con barra', T(4, '8-12', 120)], ['Prensa de pierna', T(3, '10-12', 90)],
           ['Peso muerto rumano', T(3, '8-12', 90)], ['Extensión de cuádriceps', T(3, '12-15', 60)],
           ['Elevación de talones de pie', T(4, '12-15', 45)],
         ] },
-        { name: 'Push B', emoji: '🔷', color: '#64D2FF', muscles: ['pecho', 'hombro', 'triceps'], exercises: [
+        { name: 'Push B', emoji: '🏋️', color: '#64D2FF', muscles: ['pecho', 'hombro', 'triceps'], exercises: [
           ['Press plano con mancuernas', T(4, '8-12', 90)], ['Cruce de poleas', T(3, '12-15', 60)],
           ['Press militar con barra', T(3, '8-10', 90)], ['Press francés', T(3, '10-12', 60)],
           ['Fondos en paralelas', T(3, '8-12', 90)],
         ] },
-        { name: 'Pull B', emoji: '💚', color: '#30D158', muscles: ['espalda', 'biceps'], exercises: [
+        { name: 'Pull B', emoji: '🧲', color: '#30D158', muscles: ['espalda', 'biceps'], exercises: [
           ['Jalón al pecho', T(4, '8-12', 90)], ['Remo con mancuerna a una mano', T(3, '8-12', 90)],
           ['Pullover en polea', T(3, '12-15', 60)], ['Curl martillo', T(3, '10-12', 60)],
           ['Curl predicador', T(3, '10-12', 60)],
         ] },
-        { name: 'Legs B', emoji: '🧡', color: '#FF9F0A', muscles: ['pierna', 'abdomen'], exercises: [
+        { name: 'Legs B', emoji: '🦿', color: '#FF9F0A', muscles: ['pierna', 'abdomen'], exercises: [
           ['Sentadilla búlgara', T(3, '10-12', 90)], ['Hip thrust', T(4, '8-12', 90)],
           ['Curl femoral acostado', T(3, '10-12', 60)], ['Elevación de talones sentado', T(4, '15-20', 45)],
           ['Crunch en polea', T(3, '12-15', 45)],
@@ -68,15 +68,15 @@ export const ROUTINE_TEMPLATES = {
     {
       name: 'Fuerza 5x5 (3 días)',
       days: [
-        { name: 'Día A', emoji: '🔴', color: '#FF453A', muscles: ['pierna', 'pecho', 'espalda'], exercises: [
+        { name: 'Día A', emoji: '🏋️', color: '#FF453A', muscles: ['pierna', 'pecho', 'espalda'], exercises: [
           ['Sentadilla con barra', T(5, '5', 180)], ['Press banca con barra', T(5, '5', 180)],
           ['Remo con barra', T(5, '5', 180)],
         ] },
-        { name: 'Día B', emoji: '🟥', color: '#FF453A', muscles: ['pierna', 'hombro', 'espalda'], exercises: [
+        { name: 'Día B', emoji: '💥', color: '#FF453A', muscles: ['pierna', 'hombro', 'espalda'], exercises: [
           ['Sentadilla con barra', T(5, '5', 180)], ['Press militar con barra', T(5, '5', 180)],
           ['Peso muerto', T(3, '3-5', 240)],
         ] },
-        { name: 'Día C', emoji: '❤️', color: '#FF453A', muscles: ['pierna', 'pecho', 'espalda'], exercises: [
+        { name: 'Día C', emoji: '🔥', color: '#FF453A', muscles: ['pierna', 'pecho', 'espalda'], exercises: [
           ['Sentadilla con barra', T(5, '5', 180)], ['Press banca con barra', T(5, '5', 180)],
           ['Dominadas', T(3, '5-8', 180)],
         ] },
@@ -87,17 +87,17 @@ export const ROUTINE_TEMPLATES = {
     {
       name: 'Full Body + Cardio (3 días)',
       days: [
-        { name: 'Full Body A', emoji: '🟢', color: '#30D158', muscles: ['pecho', 'espalda', 'pierna'], exercises: [
+        { name: 'Full Body A', emoji: '🔥', color: '#30D158', muscles: ['pecho', 'espalda', 'pierna'], exercises: [
           ['Sentadilla con barra', T(3, '12-15', 45)], ['Press banca con barra', T(3, '12-15', 45)],
           ['Remo en polea baja', T(3, '12-15', 45)], ['Plancha', T(3, '30-60s', 45)],
           ['Correr en cinta', T(1, '20 min', 0)],
         ] },
-        { name: 'Full Body B', emoji: '💚', color: '#30D158', muscles: ['pierna', 'hombro', 'abdomen'], exercises: [
+        { name: 'Full Body B', emoji: '💦', color: '#30D158', muscles: ['pierna', 'hombro', 'abdomen'], exercises: [
           ['Prensa de pierna', T(3, '12-15', 45)], ['Press de hombros con mancuernas', T(3, '12-15', 45)],
           ['Jalón al pecho', T(3, '12-15', 45)], ['Giro ruso', T(3, '15-20', 45)],
           ['Bicicleta estática', T(1, '20 min', 0)],
         ] },
-        { name: 'Full Body C', emoji: '🍀', color: '#30D158', muscles: ['pierna', 'pecho', 'espalda'], exercises: [
+        { name: 'Full Body C', emoji: '⚡', color: '#30D158', muscles: ['pierna', 'pecho', 'espalda'], exercises: [
           ['Zancadas con mancuernas', T(3, '12-15', 45)], ['Press plano con mancuernas', T(3, '12-15', 45)],
           ['Remo con mancuerna a una mano', T(3, '12-15', 45)], ['Crunch abdominal', T(3, '15-20', 45)],
           ['Elíptica', T(1, '20 min', 0)],
@@ -130,19 +130,19 @@ export const ROUTINE_TEMPLATES = {
     {
       name: 'Upper Lower (4 días) + cardio ligero',
       days: [
-        { name: 'Upper A', emoji: '🟣', color: '#BF5AF2', muscles: ['pecho', 'espalda', 'hombro'], exercises: [
+        { name: 'Upper A', emoji: '💪', color: '#BF5AF2', muscles: ['pecho', 'espalda', 'hombro'], exercises: [
           ['Press banca con barra', T(4, '8-12', 90)], ['Remo con barra', T(4, '8-12', 90)],
           ['Press de hombros con mancuernas', T(3, '8-12', 90)], ['Elevaciones laterales', T(3, '12-15', 60)],
         ] },
-        { name: 'Lower A', emoji: '💜', color: '#BF5AF2', muscles: ['pierna'], exercises: [
+        { name: 'Lower A', emoji: '🦵', color: '#BF5AF2', muscles: ['pierna'], exercises: [
           ['Sentadilla con barra', T(4, '8-12', 120)], ['Peso muerto rumano', T(3, '8-12', 90)],
           ['Extensión de cuádriceps', T(3, '12-15', 60)], ['Elevación de talones de pie', T(4, '12-15', 45)],
         ] },
-        { name: 'Upper B', emoji: '🔮', color: '#BF5AF2', muscles: ['espalda', 'pecho', 'biceps', 'triceps'], exercises: [
+        { name: 'Upper B', emoji: '🤸', color: '#BF5AF2', muscles: ['espalda', 'pecho', 'biceps', 'triceps'], exercises: [
           ['Jalón al pecho', T(4, '8-12', 90)], ['Press inclinado con mancuernas', T(3, '8-12', 90)],
           ['Curl con barra', T(3, '10-12', 60)], ['Extensión con cuerda', T(3, '10-12', 60)],
         ] },
-        { name: 'Lower B + cardio', emoji: '✨', color: '#BF5AF2', muscles: ['pierna', 'cardio'], exercises: [
+        { name: 'Lower B + cardio', emoji: '🏃', color: '#BF5AF2', muscles: ['pierna', 'cardio'], exercises: [
           ['Hip thrust', T(4, '8-12', 90)], ['Sentadilla búlgara', T(3, '10-12', 90)],
           ['Curl femoral acostado', T(3, '10-12', 60)], ['Caminata en cinta', T(1, '20 min', 0)],
         ] },

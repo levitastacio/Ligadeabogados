@@ -89,7 +89,8 @@ export default function HomePage() {
   const streakPlain = currentStreak(allDates, false)
   const streakWithPardon = currentStreak(allDates, true)
   const streak = pardonUsed ? streakWithPardon : streakPlain
-  const canOfferPardon = !pardonUsed && streakWithPardon > streakPlain
+  // El dia de perdon solo se ofrece cuando la racha ya se rompio y aun se puede salvar
+  const canOfferPardon = !pardonUsed && streakPlain === 0 && streakWithPardon > 0
 
   const usePardon = async () => {
     await supabase.from('profiles').update({ streak_pardon_used_month: monthStr() }).eq('id', user.id)
@@ -159,8 +160,10 @@ export default function HomePage() {
       {canOfferPardon && (
         <div className="card row-between">
           <div>
-            <h3>Tu racha peligra</h3>
-            <p className="muted" style={{ fontSize: 13 }}>Te queda 1 día de perdón este mes</p>
+            <h3>Se te rompió la racha</h3>
+            <p className="muted" style={{ fontSize: 13 }}>
+              Te queda 1 día de perdón este mes, úsalo y sigue de largo
+            </p>
           </div>
           <button className="btn small" onClick={usePardon}>Usarlo</button>
         </div>
@@ -232,10 +235,8 @@ export default function HomePage() {
         </div>
       )}
 
-      <div className="row">
-        <button className="btn" onClick={() => navigate('/entrenar')}>🏋️ Entrenar ahora</button>
-        <button className="btn secondary" onClick={() => navigate('/carrera')}>🏃 Registrar carrera</button>
-      </div>
+      <button className="btn mb" onClick={() => navigate('/entrenar')}>🏋️ Entrenar ahora</button>
+      <button className="btn secondary" onClick={() => navigate('/carrera')}>🏃 Registrar carrera</button>
 
       <p className="tiny center mt">
         Este mes: {monthDates.size} días activos, {fmtVolume(monthVolumeKg, profile.unit)} de volumen, {monthPRs} PRs

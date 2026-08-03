@@ -16,13 +16,22 @@ export default function MedalCase({ medals }) {
     byMonth[m.month] = byMonth[m.month] || []
     byMonth[m.month].push(m)
   }
+  // Dentro de cada mes: primero las de competencia por puesto, luego las personales
+  for (const list of Object.values(byMonth)) {
+    list.sort((a, b) => {
+      const grupoA = a.group_id ? 0 : 1
+      const grupoB = b.group_id ? 0 : 1
+      if (grupoA !== grupoB) return grupoA - grupoB
+      return (a.rank || 9) - (b.rank || 9)
+    })
+  }
   const months = Object.keys(byMonth).sort().reverse()
 
   return (
     <div>
       {months.map((month) => (
         <div key={month} className="card">
-          <h3 className="mb" style={{ textTransform: 'capitalize' }}>{monthLabel(month)}</h3>
+          <h3 className="mb">{monthLabel(month)}</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
             {byMonth[month].map((m) => {
               const info = medalInfo(m.code)

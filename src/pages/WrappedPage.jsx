@@ -79,7 +79,7 @@ export default function WrappedPage() {
       {slide.type === 'intro' && (
         <div className="pop">
           <p style={{ fontSize: 60 }}>🎬</p>
-          <h1 style={{ fontSize: 34, textTransform: 'capitalize' }}>{monthLabel(month)}</h1>
+          <h1 style={{ fontSize: 34 }}>{monthLabel(month)}</h1>
           <p style={{ opacity: 0.7, marginTop: 10, fontSize: 17 }}>Así te fue. Toca para avanzar.</p>
         </div>
       )}

@@ -7,17 +7,19 @@ const RING_DEFS = [
 
 function Ring({ cx, cy, r, stroke, progress, color }) {
   const c = 2 * Math.PI * r
-  const pct = Math.max(0, Math.min(1, progress))
+  const pct = Math.max(0, Math.min(1, Number(progress) || 0))
   return (
     <>
       <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeOpacity="0.18" strokeWidth={stroke} />
-      <circle
-        cx={cx} cy={cy} r={r} fill="none"
-        stroke={color} strokeWidth={stroke} strokeLinecap="round"
-        strokeDasharray={`${c * pct} ${c}`}
-        transform={`rotate(-90 ${cx} ${cy})`}
-        style={{ transition: 'stroke-dasharray 0.9s cubic-bezier(.32,.72,.35,1)' }}
-      />
+      {pct > 0 && (
+        <circle
+          cx={cx} cy={cy} r={r} fill="none"
+          stroke={color} strokeWidth={stroke} strokeLinecap="round"
+          strokeDasharray={`${c * pct} ${c}`}
+          transform={`rotate(-90 ${cx} ${cy})`}
+          style={{ transition: 'stroke-dasharray 0.9s cubic-bezier(.32,.72,.35,1)' }}
+        />
+      )}
     </>
   )
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase, isDemo } from '../lib/supabase'
+import { DEMO_GROUP_CODE } from '../lib/demo/db'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../components/common/Toast'
 import { GOALS, genInviteCode } from '../lib/utils'
@@ -22,9 +23,9 @@ export default function Onboarding() {
   const [goal, setGoal] = useState('masa')
   const [weeklyTarget, setWeeklyTarget] = useState(4)
   const [templateIdx, setTemplateIdx] = useState(0)
-  const [groupMode, setGroupMode] = useState('crear')
+  const [groupMode, setGroupMode] = useState(isDemo ? 'unirme' : 'crear')
   const [groupName, setGroupName] = useState('')
-  const [inviteCode, setInviteCode] = useState('')
+  const [inviteCode, setInviteCode] = useState(isDemo ? DEMO_GROUP_CODE : '')
 
   const next = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1))
 
@@ -217,7 +218,11 @@ export default function Onboarding() {
       {step === 4 && (
         <div className="pop">
           <h1>Tu squad</h1>
-          <p className="muted mb">Únete a un grupo con código o crea el tuyo.</p>
+          <p className="muted mb">
+            {isDemo
+              ? `Modo demo: el código ${DEMO_GROUP_CODE} ya está puesto para que entres al squad de prueba.`
+              : 'Únete a un grupo con código o crea el tuyo.'}
+          </p>
           <div className="segmented mb">
             <button className={groupMode === 'crear' ? 'active' : ''} onClick={() => setGroupMode('crear')}>Crear grupo</button>
             <button className={groupMode === 'unirme' ? 'active' : ''} onClick={() => setGroupMode('unirme')}>Tengo un código</button>

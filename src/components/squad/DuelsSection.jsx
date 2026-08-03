@@ -109,7 +109,11 @@ export default function DuelsSection({ group, members }) {
         const ov = Number(prog?.opponent_value || 0)
         const max = Math.max(cv, ov, 1)
         const isKm = d.metric === 'km'
-        const fmt = (v) => (isKm ? `${v.toFixed(1)} km` : d.metric === 'dias' ? `${Math.round(v)} días` : `${Math.round(v)} kg`)
+        const fmt = (v) => {
+          if (isKm) return `${v.toFixed(1)} km`
+          if (d.metric === 'dias') return `${Math.round(v)} ${Math.round(v) === 1 ? 'día' : 'días'}`
+          return `${Math.round(v).toLocaleString('es-DO')} kg`
+        }
         return (
           <div key={d.id} className="card">
             <div className="row-between mb">
